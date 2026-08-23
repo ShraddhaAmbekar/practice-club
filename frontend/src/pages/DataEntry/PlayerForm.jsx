@@ -20,7 +20,6 @@ function PlayerForm({ player, onSave, onCancel }) {
   });
 
   const [form, setForm] = useState(getInitialForm);
-
   const [competition, setCompetition] = useState("");
 
   const [relative, setRelative] = useState({
@@ -49,9 +48,7 @@ function PlayerForm({ player, onSave, onCancel }) {
 
     setForm({
       photo: player.photo || "",
-
       fullName: player.fullName || "",
-
       nickname: player.nickname || "",
 
       birthDate: player.birthDate
@@ -168,6 +165,15 @@ function PlayerForm({ player, onSave, onCancel }) {
     };
 
     reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    setForm((prev) => ({
+      ...prev,
+      photo: "",
+    }));
+
+    setMessage("");
   };
 
   // =========================================================
@@ -505,7 +511,7 @@ function PlayerForm({ player, onSave, onCancel }) {
   // =========================================================
 
   return (
-    <div className="min-h-screen bg-[#f5f8f6] text-slate-900 px-4 py-6 sm:px-6 lg:px-10">
+    <div className="min-h-screen bg-[#FFFDF7] text-[#111111] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* =====================================================
           BACKGROUND
@@ -513,15 +519,15 @@ function PlayerForm({ player, onSave, onCancel }) {
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
 
-        <div className="absolute -top-60 -right-60 h-[600px] w-[600px] rounded-full bg-emerald-100/50 blur-3xl" />
+        <div className="absolute -top-60 -right-60 h-[600px] w-[600px] rounded-full bg-[#F5E7B2]/40 blur-3xl" />
 
-        <div className="absolute -bottom-60 -left-60 h-[600px] w-[600px] rounded-full bg-green-100/40 blur-3xl" />
+        <div className="absolute -bottom-60 -left-60 h-[600px] w-[600px] rounded-full bg-[#D4A017]/10 blur-3xl" />
 
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage:
-              "linear-gradient(#064e3b 1px, transparent 1px), linear-gradient(90deg, #064e3b 1px, transparent 1px)",
+              "linear-gradient(#8A5A0A 1px, transparent 1px), linear-gradient(90deg, #8A5A0A 1px, transparent 1px)",
             backgroundSize:
               "70px 70px",
           }}
@@ -543,15 +549,15 @@ function PlayerForm({ player, onSave, onCancel }) {
 
               <div className="flex items-center gap-3 mb-2">
 
-                <div className="h-9 w-1 rounded-full bg-emerald-600" />
+                <div className="h-9 w-1 rounded-full bg-[#D4A017]" />
 
-                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-700">
+                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#8A5A0A]">
                   Practice Football Club
                 </span>
 
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#09251b]">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#111111]">
 
                 {player
                   ? "Edit Player"
@@ -559,7 +565,7 @@ function PlayerForm({ player, onSave, onCancel }) {
 
               </h1>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-[#6F6250]">
 
                 {player
                   ? "खेळाडूची माहिती update करा."
@@ -569,11 +575,11 @@ function PlayerForm({ player, onSave, onCancel }) {
 
             </div>
 
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 shadow-sm">
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-[#E8D49A] bg-white px-4 py-2 shadow-sm">
 
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="h-2 w-2 rounded-full bg-[#D4A017]" />
 
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#8A5A0A]">
                 {player
                   ? "Admin Edit"
                   : "New Entry"}
@@ -600,25 +606,43 @@ function PlayerForm({ player, onSave, onCancel }) {
 
           <FormSection
             number="01"
-            title="छायाचित्र"
+            title="PHOTO"
             subtitle="खेळाडूचे छायाचित्र"
           >
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
 
-              <div className="relative">
+              {/* PHOTO PREVIEW */}
+
+              <div className="relative shrink-0">
 
                 {form.photo ? (
 
-                  <img
-                    src={form.photo}
-                    alt="Player"
-                    className="h-32 w-32 rounded-2xl object-cover border-4 border-white shadow-lg"
-                  />
+                  <div className="relative">
+
+                    <img
+                      src={form.photo}
+                      alt={form.fullName || "Player"}
+                      className="h-32 w-32 rounded-2xl object-cover border-4 border-white shadow-lg"
+                    />
+
+                    {/* REMOVE PHOTO */}
+
+                    <button
+                      type="button"
+                      onClick={removePhoto}
+                      disabled={loading}
+                      className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-lg font-bold text-white shadow-md hover:bg-red-600 transition disabled:opacity-50"
+                      title="Remove photo"
+                    >
+                      ×
+                    </button>
+
+                  </div>
 
                 ) : (
 
-                  <div className="h-32 w-32 rounded-2xl bg-[#063b2b] flex items-center justify-center shadow-lg">
+                  <div className="h-32 w-32 rounded-2xl bg-[#111111] flex items-center justify-center shadow-lg">
 
                     <span className="text-4xl">
                       ⚽
@@ -630,9 +654,11 @@ function PlayerForm({ player, onSave, onCancel }) {
 
               </div>
 
+              {/* PHOTO INPUT */}
+
               <div className="flex-1 w-full">
 
-                <label className="block mb-2 text-xs font-bold text-slate-600">
+                <label className="block mb-2 text-xs font-bold text-[#6F6250]">
                   Player Photo
                 </label>
 
@@ -640,12 +666,21 @@ function PlayerForm({ player, onSave, onCancel }) {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handlePhotoChange}
-                  className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:font-bold file:text-emerald-700 hover:border-emerald-300"
+                  disabled={loading}
+                  className="block w-full rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-[#FFF8E5] file:px-4 file:py-2 file:font-bold file:text-[#8A5A0A] hover:border-[#D4A017] disabled:cursor-not-allowed disabled:opacity-60"
                 />
 
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-[#9A8F7D]">
                   JPG, PNG किंवा WEBP. Maximum 5 MB.
                 </p>
+
+                {form.photo && (
+
+                  <p className="mt-2 text-xs font-semibold text-[#8A5A0A]">
+                    ✓ Photo selected
+                  </p>
+
+                )}
 
               </div>
 
@@ -659,7 +694,7 @@ function PlayerForm({ player, onSave, onCancel }) {
 
           <FormSection
             number="02"
-            title="वैयक्तिक माहिती"
+            title="PERSONAL INFORMATION"
             subtitle="खेळाडूची मूलभूत माहिती"
           >
 
@@ -802,7 +837,7 @@ function PlayerForm({ player, onSave, onCancel }) {
 
             {/* CURRENT PLAYER */}
 
-            <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+            <div className="mt-6 rounded-2xl border border-[#E8D49A] bg-[#FFF8E5] p-4">
 
               <label className="flex items-center gap-3 cursor-pointer">
 
@@ -814,16 +849,16 @@ function PlayerForm({ player, onSave, onCancel }) {
                     form.currentlyPlayingAtPracticeClub
                   }
                   onChange={handleChange}
-                  className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  className="h-5 w-5 rounded border-[#D4A017] text-[#D4A017] focus:ring-[#D4A017]"
                 />
 
                 <div>
 
-                  <span className="block text-sm font-bold text-[#09251b]">
+                  <span className="block text-sm font-bold text-[#111111]">
                     सध्या Practice Club मध्ये खेळत आहे
                   </span>
 
-                  <span className="block mt-0.5 text-xs text-slate-500">
+                  <span className="block mt-0.5 text-xs text-[#6F6250]">
                     Player सध्या Club मध्ये active असल्यास निवडा.
                   </span>
 
@@ -860,13 +895,13 @@ function PlayerForm({ player, onSave, onCancel }) {
                   }
                 }}
                 placeholder="स्पर्धेचे नाव"
-                className="flex-1 h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                className="flex-1 h-12 rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 text-sm outline-none transition focus:bg-white focus:border-[#D4A017] focus:ring-4 focus:ring-[#D4A017]/10"
               />
 
               <button
                 type="button"
                 onClick={addCompetition}
-                className="h-12 px-6 rounded-xl bg-[#063b2b] text-white text-sm font-bold hover:bg-emerald-700 transition"
+                className="h-12 px-6 rounded-xl bg-[#111111] text-white text-sm font-bold hover:bg-[#D4A017] hover:text-[#111111] transition"
               >
                 + स्पर्धा जोडा
               </button>
@@ -882,16 +917,16 @@ function PlayerForm({ player, onSave, onCancel }) {
 
                     <div
                       key={`${item}-${index}`}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 py-3"
                     >
 
                       <div className="flex items-center gap-3">
 
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-black text-emerald-700">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F5E7B2] text-xs font-black text-[#8A5A0A]">
                           {index + 1}
                         </span>
 
-                        <span className="text-sm font-semibold text-slate-700">
+                        <span className="text-sm font-semibold text-[#3F382E]">
                           {item}
                         </span>
 
@@ -902,7 +937,7 @@ function PlayerForm({ player, onSave, onCancel }) {
                         onClick={() =>
                           removeCompetition(index)
                         }
-                        className="h-8 w-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition"
+                        className="h-8 w-8 rounded-lg text-[#9A8F7D] hover:bg-red-50 hover:text-red-600 transition"
                       >
                         ×
                       </button>
@@ -987,7 +1022,7 @@ function PlayerForm({ player, onSave, onCancel }) {
                 <button
                   type="button"
                   onClick={addRelative}
-                  className="mt-4 h-12 px-6 rounded-xl bg-[#063b2b] text-white text-sm font-bold hover:bg-emerald-700 transition"
+                  className="mt-4 h-12 px-6 rounded-xl bg-[#111111] text-white text-sm font-bold hover:bg-[#D4A017] hover:text-[#111111] transition"
                 >
                   + नातेवाईक जोडा
                 </button>
@@ -1001,16 +1036,16 @@ function PlayerForm({ player, onSave, onCancel }) {
 
                         <div
                           key={`${item.name}-${index}`}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                          className="flex items-center justify-between gap-3 rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 py-3"
                         >
 
                           <div>
 
-                            <p className="text-sm font-bold text-slate-800">
+                            <p className="text-sm font-bold text-[#111111]">
                               {item.name}
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-0.5">
+                            <p className="text-xs text-[#9A8F7D] mt-0.5">
                               {item.relation}
                             </p>
 
@@ -1021,7 +1056,7 @@ function PlayerForm({ player, onSave, onCancel }) {
                             onClick={() =>
                               removeRelative(index)
                             }
-                            className="h-8 w-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition"
+                            className="h-8 w-8 rounded-lg text-[#9A8F7D] hover:bg-red-50 hover:text-red-600 transition"
                           >
                             ×
                           </button>
@@ -1050,7 +1085,7 @@ function PlayerForm({ player, onSave, onCancel }) {
             <div
               className={
                 message.startsWith("✓")
-                  ? "rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+                  ? "rounded-2xl border border-[#E8D49A] bg-[#FFF8E5] px-5 py-4 text-sm font-semibold text-[#8A5A0A]"
                   : "rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600"
               }
             >
@@ -1065,7 +1100,7 @@ function PlayerForm({ player, onSave, onCancel }) {
 
           <div className="sticky bottom-3 z-20">
 
-            <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md p-3 shadow-[0_15px_50px_rgba(15,23,42,0.10)]">
+            <div className="rounded-2xl border border-[#E8D49A] bg-white/95 backdrop-blur-md p-3 shadow-[0_15px_50px_rgba(138,90,10,0.10)]">
 
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
 
@@ -1075,7 +1110,7 @@ function PlayerForm({ player, onSave, onCancel }) {
                     type="button"
                     onClick={onCancel}
                     disabled={loading}
-                    className="h-12 px-6 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
+                    className="h-12 px-6 rounded-xl border border-[#E8D49A] bg-white text-sm font-bold text-[#6F6250] hover:bg-[#FFF8E5] transition disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -1085,7 +1120,7 @@ function PlayerForm({ player, onSave, onCancel }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group h-12 px-8 rounded-xl bg-[#063b2b] text-white text-sm font-black transition hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-900/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group h-12 px-8 rounded-xl bg-[#111111] text-white text-sm font-black transition hover:bg-[#D4A017] hover:text-[#111111] hover:shadow-lg hover:shadow-[#D4A017]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
 
                   <span className="flex items-center justify-center gap-3">
@@ -1094,7 +1129,7 @@ function PlayerForm({ player, onSave, onCancel }) {
 
                       <>
 
-                        <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-[#D4A017] animate-spin" />
 
                         {player
                           ? "Update होत आहे..."
@@ -1131,6 +1166,7 @@ function PlayerForm({ player, onSave, onCancel }) {
         </form>
 
       </div>
+
     </div>
   );
 }
@@ -1146,25 +1182,25 @@ function FormSection({
   children,
 }) {
   return (
-    <section className="relative overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+    <section className="relative overflow-hidden rounded-[22px] border border-[#E8D49A] bg-white shadow-[0_10px_35px_rgba(138,90,10,0.05)]">
 
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-600" />
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#D4A017]" />
 
       <div className="p-5 sm:p-7">
 
         <div className="flex items-start gap-4 mb-6">
 
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[10px] font-black text-emerald-700">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF8E5] text-[10px] font-black text-[#8A5A0A]">
             {number}
           </div>
 
           <div>
 
-            <h2 className="text-lg sm:text-xl font-black tracking-tight text-[#09251b]">
+            <h2 className="text-lg sm:text-xl font-black tracking-tight text-[#111111]">
               {title}
             </h2>
 
-            <p className="mt-1 text-xs sm:text-sm text-slate-400">
+            <p className="mt-1 text-xs sm:text-sm text-[#9A8F7D]">
               {subtitle}
             </p>
 
@@ -1201,7 +1237,7 @@ function InputField({
   return (
     <div>
 
-      <label className="block mb-2 text-xs font-bold text-slate-600">
+      <label className="block mb-2 text-xs font-bold text-[#6F6250]">
         {label}
       </label>
 
@@ -1217,7 +1253,7 @@ function InputField({
         max={max}
         disabled={disabled}
         inputMode={inputMode}
-        className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+        className="w-full h-12 rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 text-sm text-[#111111] outline-none transition-all placeholder:text-[#9A8F7D] focus:bg-white focus:border-[#D4A017] focus:ring-4 focus:ring-[#D4A017]/10 disabled:cursor-not-allowed disabled:bg-[#F3F0E8] disabled:text-[#9A8F7D]"
       />
 
     </div>
@@ -1239,7 +1275,7 @@ function SelectField({
   return (
     <div>
 
-      <label className="block mb-2 text-xs font-bold text-slate-600">
+      <label className="block mb-2 text-xs font-bold text-[#6F6250]">
         {label}
       </label>
 
@@ -1248,7 +1284,7 @@ function SelectField({
         value={value}
         onChange={onChange}
         disabled={disabled}
-        className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+        className="w-full h-12 rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 text-sm text-[#111111] outline-none transition-all focus:bg-white focus:border-[#D4A017] focus:ring-4 focus:ring-[#D4A017]/10 disabled:cursor-not-allowed disabled:bg-[#F3F0E8] disabled:text-[#9A8F7D]"
       >
 
         {options.map(
@@ -1299,7 +1335,7 @@ function YearSelectField({
   return (
     <div>
 
-      <label className="block mb-2 text-xs font-bold text-slate-600">
+      <label className="block mb-2 text-xs font-bold text-[#6F6250]">
         {label}
       </label>
 
@@ -1308,7 +1344,7 @@ function YearSelectField({
         value={value}
         onChange={onChange}
         disabled={disabled}
-        className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+        className="w-full h-12 rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-4 text-sm text-[#111111] outline-none transition-all focus:bg-white focus:border-[#D4A017] focus:ring-4 focus:ring-[#D4A017]/10 disabled:cursor-not-allowed disabled:bg-[#F3F0E8] disabled:text-[#9A8F7D]"
       >
 
         <option value="">
@@ -1330,7 +1366,7 @@ function YearSelectField({
 
       {disabled && (
 
-        <p className="mt-1 text-[11px] text-emerald-600">
+        <p className="mt-1 text-[11px] text-[#8A5A0A]">
           सध्या Club मध्ये खेळत असल्यामुळे शेवटचे वर्ष लागू नाही.
         </p>
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo1 from "../assets/logo.png";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -9,7 +10,6 @@ function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
 
     if (!username.trim() || !password.trim()) {
@@ -38,105 +38,77 @@ function Login({ onLogin }) {
 
       if (!response.ok) {
         setError(
-          data.message ||
-            "Username किंवा Password चुकीचा आहे."
+          data.message || "Username किंवा Password चुकीचा आहे."
         );
         return;
       }
 
       localStorage.setItem("token", data.token);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       onLogin(data.user);
     } catch (error) {
       console.error("Frontend login error:", error);
-
-      setError(
-        "Server शी connection होऊ शकले नाही."
-      );
+      setError("Server शी connection होऊ शकले नाही.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7f5] text-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FFFDF7] text-[#111111] relative overflow-hidden">
 
-      {/* =====================================================
-          BACKGROUND
-      ===================================================== */}
+      {/* ================= BACKGROUND ================= */}
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
-        <div className="absolute -top-40 -left-40 w-[420px] h-[420px] rounded-full bg-emerald-100/60 blur-3xl" />
+        <div className="absolute -top-40 -left-40 w-[420px] h-[420px] rounded-full bg-[#D4A017]/10 blur-3xl" />
 
-        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-green-100/50 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#C99216]/10 blur-3xl" />
 
-        {/* Desktop pitch decoration */}
+        <div className="hidden lg:block absolute left-1/2 bottom-[-420px] -translate-x-1/2 w-[900px] h-[900px] rounded-full border border-[#D4A017]/10" />
 
-        <div className="hidden lg:block absolute left-1/2 bottom-[-420px] -translate-x-1/2 w-[900px] h-[900px] rounded-full border border-emerald-700/[0.06]" />
-
-        <div className="hidden lg:block absolute left-1/2 bottom-[-300px] -translate-x-1/2 w-[620px] h-[620px] rounded-full border border-emerald-700/[0.05]" />
+        <div className="hidden lg:block absolute left-1/2 bottom-[-300px] -translate-x-1/2 w-[620px] h-[620px] rounded-full border border-[#8A5A0A]/10" />
 
       </div>
 
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
+      {/* ================= HEADER ================= */}
 
       <header className="relative z-20 px-5 sm:px-8 lg:px-14 py-4 sm:py-5">
 
         <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-          {/* LOGO */}
-
           <div className="flex items-center gap-3">
 
-            {/* =================================================
-                LOGO PLACEHOLDER
-                Replace this div with img later
-            ================================================= */}
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#111111] flex items-center justify-center overflow-hidden shadow-lg shadow-[#D4A017]/20">
 
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#063b2b] flex items-center justify-center shadow-lg shadow-emerald-900/10">
-
-              <span className="text-lg sm:text-xl font-black text-white">
-                FC
-              </span>
+              <img
+                src={logo1}
+                alt="Practice Football Club Logo"
+                className="w-full h-full object-contain p-1"
+              />
 
             </div>
 
             <div>
-
-              <h2 className="text-xs sm:text-sm font-black tracking-tight text-slate-900">
-                PRACTICE FC
+              <h2 className="text-xs sm:text-sm font-black tracking-tight text-[#111111]">
+                PRACTICE
               </h2>
 
-              <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-slate-400">
+              <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-[#8A5A0A]/60">
                 Football Club
               </p>
-
             </div>
 
           </div>
-
-
-          {/* Desktop status */}
-
-       
 
         </div>
 
       </header>
 
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
+      {/* ================= MAIN ================= */}
 
       <main className="relative z-10 min-h-[calc(100vh-80px)] flex items-start lg:items-center px-4 sm:px-8 lg:px-14 pt-5 sm:pt-8 lg:pt-0 pb-8">
 
@@ -145,86 +117,76 @@ function Login({ onLogin }) {
           <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 xl:gap-24 items-center">
 
 
-            {/* =================================================
-                DESKTOP BRANDING
-            ================================================= */}
+            {/* ================= DESKTOP BRANDING ================= */}
 
             <section className="hidden lg:block">
 
               <div className="max-w-xl">
 
-                <div className="flex items-center gap-3 mb-7">
+                {/* LOGO */}
 
-                  <span className="w-10 h-[2px] bg-emerald-500" />
+                <div className="flex items-center justify-start">
 
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-emerald-600">
-                    Welcome to the Club
-                  </span>
+                  <div className="w-[380px] h-[380px] xl:w-[440px] xl:h-[440px] flex items-center justify-center">
+
+                    <img
+                      src={logo1}
+                      alt="Practice Football Club Logo"
+                      className="w-full h-full object-contain"
+                    />
+
+                  </div>
 
                 </div>
 
 
-                <h1 className="text-6xl xl:text-7xl font-black tracking-[-0.05em] leading-[0.92] text-[#09251b]">
+                {/* DESCRIPTION */}
 
-                  WHERE
-                  <br />
-
-                  <span className="text-emerald-600">
-                    PASSION
-                  </span>
-
-                  <br />
-
-                  MEETS
-                  <br />
-
-                  <span className="text-slate-300">
-                    FOOTBALL.
-                  </span>
-
-                </h1>
-
-
-                <p className="mt-8 max-w-md text-sm leading-7 text-slate-500">
-                  A dedicated platform for managing
-                  your football club, players, events
-                  and everything that keeps the team
+                <p className="mt-8 max-w-md text-sm leading-7 text-[#111111]/55">
+                  A dedicated platform for managing your football club,
+                  players, events and everything that keeps the team
                   moving forward.
                 </p>
 
 
+                {/* VALUES */}
+
                 <div className="mt-12 flex items-center gap-8">
 
                   <div>
-                    <p className="text-xl font-black text-[#09251b]">
+                    <p className="text-xl font-black text-[#111111]">
                       TEAM
                     </p>
 
-                    <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-slate-400">
+                    <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-[#8A5A0A]">
                       Together
                     </p>
                   </div>
 
-                  <div className="h-9 w-px bg-slate-200" />
+
+                  <div className="h-9 w-px bg-[#D4A017]/25" />
+
 
                   <div>
-                    <p className="text-xl font-black text-[#09251b]">
+                    <p className="text-xl font-black text-[#111111]">
                       DRIVE
                     </p>
 
-                    <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-slate-400">
+                    <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-[#8A5A0A]">
                       Forward
                     </p>
                   </div>
 
-                  <div className="h-9 w-px bg-slate-200" />
+
+                  <div className="h-9 w-px bg-[#D4A017]/25" />
+
 
                   <div>
-                    <p className="text-xl font-black text-[#09251b]">
+                    <p className="text-xl font-black text-[#111111]">
                       LEGACY
                     </p>
 
-                    <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-slate-400">
+                    <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-[#8A5A0A]">
                       Forever
                     </p>
                   </div>
@@ -236,83 +198,76 @@ function Login({ onLogin }) {
             </section>
 
 
-            {/* =================================================
-                LOGIN AREA
-            ================================================= */}
+            {/* ================= LOGIN AREA ================= */}
 
             <section className="w-full max-w-md mx-auto">
 
-              {/* =================================================
-                  MOBILE BRANDING
-              ================================================= */}
+
+              {/* ================= MOBILE BRANDING ================= */}
 
               <div className="lg:hidden text-center mb-6 sm:mb-8">
 
-                {/* Logo */}
+                <div className="mx-auto mb-4 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#111111] flex items-center justify-center overflow-hidden shadow-xl shadow-[#D4A017]/20">
 
-                <div className="mx-auto mb-4 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#063b2b] flex items-center justify-center shadow-xl shadow-emerald-900/15">
-
-                  {/* Replace FC with actual logo image later */}
-
-                  <span className="text-2xl sm:text-3xl font-black text-white">
-                    FC
-                  </span>
+                  <img
+                    src={logo1}
+                    alt="Practice Football Club Logo"
+                    className="w-full h-full object-contain p-2"
+                  />
 
                 </div>
 
 
-                <h1 className="text-2xl sm:text-3xl font-black tracking-[-0.03em] text-[#09251b]">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-[-0.03em] text-[#111111]">
                   PRACTICE FOOTBALL CLUB
                 </h1>
 
 
                 <div className="mt-2 flex items-center justify-center gap-2">
 
-                  <span className="w-6 h-[1px] bg-emerald-500" />
+                  <span className="w-6 h-[1px] bg-[#D4A017]" />
 
-                  <p className="text-[9px] uppercase tracking-[0.25em] font-bold text-emerald-700">
+                  <p className="text-[9px] uppercase tracking-[0.25em] font-bold text-[#8A5A0A]">
                     Official Club Portal
                   </p>
 
-                  <span className="w-6 h-[1px] bg-emerald-500" />
+                  <span className="w-6 h-[1px] bg-[#D4A017]" />
 
                 </div>
 
               </div>
 
 
-              {/* =================================================
-                  CARD
-              ================================================= */}
+              {/* ================= LOGIN CARD ================= */}
 
               <div className="relative">
 
-                <div className="absolute -inset-1 sm:-inset-2 bg-emerald-200/30 blur-2xl rounded-[28px]" />
+                <div className="absolute -inset-1 sm:-inset-2 bg-[#D4A017]/10 blur-2xl rounded-[28px]" />
 
-                <div className="relative bg-white rounded-[22px] sm:rounded-[26px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.10)] overflow-hidden">
 
-                  {/* Accent */}
+                <div className="relative bg-[#FFFDF7] rounded-[22px] sm:rounded-[26px] border border-[#D4A017]/25 shadow-[0_20px_60px_rgba(17,17,17,0.10)] overflow-hidden">
 
-                  <div className="h-1 bg-gradient-to-r from-emerald-800 via-emerald-500 to-green-400" />
+
+                  {/* ACCENT */}
+
+                  <div className="h-1 bg-gradient-to-r from-[#111111] via-[#D4A017] to-[#8A5A0A]" />
 
 
                   <div className="p-5 sm:p-8 md:p-9">
 
 
-                    {/* =================================================
-                        CARD HEADER
-                    ================================================= */}
+                    {/* ================= CARD HEADER ================= */}
 
                     <div className="mb-6 sm:mb-8">
 
                       <div className="flex items-center justify-between">
 
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#D4A017]/10 border border-[#D4A017]/25 flex items-center justify-center">
 
                           <svg
                             viewBox="0 0 24 24"
                             fill="none"
-                            className="w-5 h-5 text-emerald-700"
+                            className="w-5 h-5 text-[#8A5A0A]"
                           >
 
                             <path
@@ -332,24 +287,24 @@ function Login({ onLogin }) {
                         </div>
 
 
-                        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.22em] font-bold text-slate-300">
+                        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.22em] font-bold text-[#111111]/25">
                           Secure Access
                         </span>
 
                       </div>
 
 
-                      <p className="mt-5 sm:mt-7 text-[9px] uppercase tracking-[0.3em] text-emerald-700 font-black">
+                      <p className="mt-5 sm:mt-7 text-[9px] uppercase tracking-[0.3em] text-[#8A5A0A] font-black">
                         Management Portal
                       </p>
 
 
-                      <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                      <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-[#111111]">
                         Welcome back.
                       </h2>
 
 
-                      <p className="mt-2 sm:mt-3 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 sm:mt-3 text-sm leading-6 text-[#111111]/55">
                         Sign in to access your club
                         management system.
                       </p>
@@ -357,9 +312,7 @@ function Login({ onLogin }) {
                     </div>
 
 
-                    {/* =================================================
-                        FORM
-                    ================================================= */}
+                    {/* ================= FORM ================= */}
 
                     <form
                       onSubmit={handleSubmit}
@@ -370,13 +323,13 @@ function Login({ onLogin }) {
 
                       <div>
 
-                        <label className="block mb-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <label className="block mb-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#111111]/60">
                           Username
                         </label>
 
                         <div className="relative">
 
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#111111]/35">
 
                             <svg
                               className="w-4 h-4"
@@ -407,7 +360,7 @@ function Login({ onLogin }) {
                             }
                             placeholder="Enter your username"
                             autoComplete="username"
-                            className="w-full h-14 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                            className="w-full h-14 rounded-xl border border-[#D4A017]/25 bg-[#FFFDF7] pl-11 pr-4 text-base sm:text-sm text-[#111111] placeholder:text-[#111111]/30 outline-none transition-all duration-300 focus:bg-white focus:border-[#D4A017] focus:ring-4 focus:ring-[#D4A017]/10"
                           />
 
                         </div>
@@ -419,13 +372,13 @@ function Login({ onLogin }) {
 
                       <div>
 
-                        <label className="block mb-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <label className="block mb-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#111111]/60">
                           Password
                         </label>
 
                         <div className="relative">
 
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#111111]/35">
 
                             <svg
                               className="w-4 h-4"
@@ -462,7 +415,7 @@ function Login({ onLogin }) {
                             }
                             placeholder="Enter your password"
                             autoComplete="current-password"
-                            className="w-full h-14 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-16 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                            className="w-full h-14 rounded-xl border border-[#D4A017]/25 bg-[#FFFDF7] pl-11 pr-16 text-base sm:text-sm text-[#111111] placeholder:text-[#111111]/30 outline-none transition-all duration-300 focus:bg-white focus:border-[#D4A017] focus:ring-4 focus:ring-[#D4A017]/10"
                           />
 
 
@@ -471,11 +424,9 @@ function Login({ onLogin }) {
                             onClick={() =>
                               setShowPassword(!showPassword)
                             }
-                            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 min-w-[48px] min-h-[42px] flex items-center justify-center text-[9px] uppercase tracking-widest font-bold text-slate-400 hover:text-emerald-600 transition"
+                            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 min-w-[48px] min-h-[42px] flex items-center justify-center text-[9px] uppercase tracking-widest font-bold text-[#111111]/40 hover:text-[#D4A017] transition"
                           >
-                            {showPassword
-                              ? "Hide"
-                              : "Show"}
+                            {showPassword ? "Hide" : "Show"}
                           </button>
 
                         </div>
@@ -486,7 +437,6 @@ function Login({ onLogin }) {
                       {/* ERROR */}
 
                       {error && (
-
                         <div className="flex gap-3 items-start rounded-xl border border-red-200 bg-red-50 px-4 py-3">
 
                           <div className="mt-0.5 w-5 h-5 shrink-0 rounded-full bg-red-100 flex items-center justify-center">
@@ -502,7 +452,6 @@ function Login({ onLogin }) {
                           </p>
 
                         </div>
-
                       )}
 
 
@@ -511,14 +460,14 @@ function Login({ onLogin }) {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="group w-full h-14 mt-2 overflow-hidden rounded-xl bg-[#063b2b] text-white font-black text-xs tracking-[0.15em] uppercase transition-all duration-300 hover:bg-emerald-700 hover:shadow-[0_12px_30px_rgba(5,150,105,0.20)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="group w-full h-14 mt-2 overflow-hidden rounded-xl bg-[#D4A017] text-[#111111] font-black text-xs tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#C99216] hover:text-white hover:shadow-[0_12px_30px_rgba(212,160,23,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
 
                         <span className="flex items-center justify-center gap-3">
 
                           {loading ? (
                             <>
-                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <span className="w-4 h-4 border-2 border-[#111111]/30 border-t-[#111111] rounded-full animate-spin" />
 
                               Signing in...
                             </>
@@ -539,27 +488,25 @@ function Login({ onLogin }) {
                     </form>
 
 
-                    {/* =================================================
-                        FOOTER
-                    ================================================= */}
+                    {/* ================= CARD FOOTER ================= */}
 
-                    <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-slate-100">
+                    <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-[#D4A017]/15">
 
                       <div className="flex items-center justify-between">
 
                         <div className="flex items-center gap-2">
 
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#D4A017]" />
 
-                          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-slate-400">
+                          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-[#111111]/35">
                             Protected Portal
                           </span>
 
                         </div>
 
 
-                        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-slate-300">
-                          Practice FC
+                        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-[#111111]/25">
+                          Practice
                         </span>
 
                       </div>
@@ -581,13 +528,11 @@ function Login({ onLogin }) {
       </main>
 
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
+      {/* ================= FOOTER ================= */}
 
       <footer className="relative z-10 pb-4 sm:pb-5 text-center px-4">
 
-        <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400">
+        <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-[#111111]/35">
           Authorized Management Access • Practice Football Club
         </p>
 

@@ -2,8 +2,7 @@ import { useState } from "react";
 import PlayerForm from "./PlayerForm";
 
 function DataEntryDashboard({ user, onLogout }) {
-  const [activePage, setActivePage] =
-    useState("dashboard");
+  const [activePage, setActivePage] = useState("dashboard");
 
   // ==========================================
   // PLAYER FORM
@@ -11,76 +10,106 @@ function DataEntryDashboard({ user, onLogout }) {
 
   if (activePage === "player-form") {
     return (
-      <div className="min-h-screen bg-[#f5f8f6] text-slate-900">
-        
+      <div className="min-h-screen bg-[#FFFDF7] text-[#111111]">
+        {/* ==========================================
+            BACKGROUND
+        ========================================== */}
+
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-60 -right-60 h-[600px] w-[600px] rounded-full bg-[#F5E7B2]/40 blur-3xl" />
+
+          <div className="absolute -bottom-60 -left-60 h-[600px] w-[600px] rounded-full bg-[#D4A017]/10 blur-3xl" />
+
+          <div
+            className="absolute inset-0 opacity-[0.025]"
+            style={{
+              backgroundImage:
+                "linear-gradient(#8A5A0A 1px, transparent 1px), linear-gradient(90deg, #8A5A0A 1px, transparent 1px)",
+              backgroundSize: "70px 70px",
+            }}
+          />
+        </div>
+
         {/* ==========================================
             TOP BAR
         ========================================== */}
 
-        <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-sm">
-          
+        <div className="sticky top-0 z-30 border-b border-[#D4A017]/30 bg-gradient-to-r from-[#111111]  via-[#111111] to-[#D4A017] backdrop-blur-md shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4">
-            
             <div className="flex items-center justify-between gap-4">
-              
-              {/* BACK BUTTON */}
 
-              <button
-                onClick={() =>
-                  setActivePage("dashboard")
-                }
-                className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-              >
-                <span className="text-lg transition-transform group-hover:-translate-x-1">
-                  ←
-                </span>
-
-                Dashboard वर जा
-              </button>
-
-              {/* USER + LOGOUT */}
-
+              {/* LEFT */}
               <div className="flex items-center gap-3">
-                
-                <div className="hidden sm:block text-right">
-                  <p className="text-xs font-bold text-slate-700">
+
+                {/* LOGO */}
+                <div className="w-11 h-11 rounded-xl bg-[#D4A017] flex items-center justify-center shadow-lg shadow-black/20">
+                  <span className="text-sm font-black text-[#111111]">
+                    FC
+                  </span>
+                </div>
+
+                <div className="hidden sm:block">
+                  <p className="text-sm font-black text-white">
+                    PRACTICE FOOTBALL CLUB
+                  </p>
+
+                  
+                </div>
+
+              </div>
+
+              {/* RIGHT */}
+              <div className="flex items-center gap-3">
+
+                {/* BACK BUTTON */}
+                <button
+                  onClick={() => setActivePage("dashboard")}
+                  className="group flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:border-[#D4A017] hover:bg-[#D4A017] hover:text-[#111111]"
+                >
+                  <span className="text-lg transition-transform group-hover:-translate-x-1">
+                    ←
+                  </span>
+
+                  Dashboard वर जा
+                </button>
+
+                {/* USER */}
+                <div className="hidden md:block text-right">
+                  <p className="text-xs font-bold text-white">
                     {user?.name || "Data Entry Operator"}
                   </p>
 
-                  <p className="text-[10px] uppercase tracking-wider text-slate-400">
-                    Data Entry
-                  </p>
+                
                 </div>
 
+                {/* LOGOUT */}
                 <button
                   onClick={onLogout}
-                  className="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100"
+                  className="rounded-xl border border-[#D4A017]/40 bg-[#111111] px-4 py-2.5 text-sm font-bold text-[#ffffff] transition hover:bg-[#C99216]"
                 >
                   Logout
                 </button>
 
               </div>
-
             </div>
-
           </div>
-
         </div>
 
         {/* ==========================================
             PLAYER FORM
         ========================================== */}
 
-        <PlayerForm
-          player={null}
-          onSave={() => {
-            setActivePage("dashboard");
-          }}
-          onCancel={() => {
-            setActivePage("dashboard");
-          }}
-        />
-
+        <div className="relative z-10">
+          <PlayerForm
+            player={null}
+            onSave={() => {
+              setActivePage("dashboard");
+            }}
+            onCancel={() => {
+              setActivePage("dashboard");
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -90,7 +119,7 @@ function DataEntryDashboard({ user, onLogout }) {
   // ==========================================
 
   return (
-    <div className="min-h-screen bg-[#f5f8f6] text-slate-900 px-4 py-6 sm:px-6 lg:px-10">
+    <div className="min-h-screen bg-[#FFFDF7] text-[#111111] px-4 py-6 sm:px-6 lg:px-10">
 
       {/* ==========================================
           BACKGROUND DECORATION
@@ -98,15 +127,15 @@ function DataEntryDashboard({ user, onLogout }) {
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
 
-        <div className="absolute -top-60 -right-60 h-[600px] w-[600px] rounded-full bg-emerald-100/50 blur-3xl" />
+        <div className="absolute -top-60 -right-60 h-[600px] w-[600px] rounded-full bg-[#F5E7B2]/40 blur-3xl" />
 
-        <div className="absolute -bottom-60 -left-60 h-[600px] w-[600px] rounded-full bg-green-100/40 blur-3xl" />
+        <div className="absolute -bottom-60 -left-60 h-[600px] w-[600px] rounded-full bg-[#D4A017]/10 blur-3xl" />
 
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage:
-              "linear-gradient(#064e3b 1px, transparent 1px), linear-gradient(90deg, #064e3b 1px, transparent 1px)",
+              "linear-gradient(#8A5A0A 1px, transparent 1px), linear-gradient(90deg, #8A5A0A 1px, transparent 1px)",
             backgroundSize: "70px 70px",
           }}
         />
@@ -127,39 +156,55 @@ function DataEntryDashboard({ user, onLogout }) {
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
 
+            {/* LEFT HEADER */}
+
             <div>
 
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-3">
 
-                <div className="h-9 w-1 rounded-full bg-emerald-600" />
+                {/* LOGO */}
 
-                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-700">
-                  Practice Football Club
+                <div className="w-12 h-12 rounded-xl bg-[#111111] flex items-center justify-center shadow-lg">
+                  <span className="text-sm font-black text-[#D4A017]">
+                    FC
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-sm font-black uppercase tracking-[0.15em] text-[#111111]">
+                    Practice Football Club
+                  </p>
+
+                  <p className="text-[9px] uppercase tracking-[0.28em] text-[#8A5A0A]">
+                   Users Portal
+                  </p>
+                </div>
+
+              </div>
+
+              <div className="flex items-center gap-3 mt-5">
+
+                <div className="h-9 w-1 rounded-full bg-[#D4A017]" />
+
+                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#8A5A0A]">
+                  Management System
                 </span>
 
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#09251b]">
-                Data Entry Dashboard
+              <h1 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight text-[#111111]">
+                Users Dashboard
               </h1>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-[#6F6250]">
                 खेळाडूची माहिती नोंदवण्यासाठी खालील पर्याय वापरा.
               </p>
 
             </div>
 
-            {/* CLUB RECORDS BADGE */}
+            {/* STATUS BADGE */}
 
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 shadow-sm">
-
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Data Entry
-              </span>
-
-            </div>
+            
 
           </div>
 
@@ -169,21 +214,19 @@ function DataEntryDashboard({ user, onLogout }) {
             WELCOME CARD
         ========================================== */}
 
-        <div className="mb-5 rounded-[22px] border border-slate-200 bg-white p-5 sm:p-7 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+        <div className="mb-5 rounded-[22px] border border-[#E8D49A] bg-white p-5 sm:p-7 shadow-[0_10px_35px_rgba(138,90,10,0.08)]">
 
           <div className="flex items-start gap-4">
 
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-xl">
-              👋
-            </div>
+            
 
             <div>
 
-              <h2 className="text-lg font-black text-[#09251b]">
+              <h2 className="text-lg font-black text-[#111111]">
                 Welcome, {user?.name || "Data Entry Operator"}
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-[#6F6250]">
                 येथे Practice Football Club मधील
                 खेळाडूंची नवीन माहिती नोंदवू शकता.
               </p>
@@ -198,9 +241,11 @@ function DataEntryDashboard({ user, onLogout }) {
             PLAYER REGISTRATION CARD
         ========================================== */}
 
-        <div className="rounded-[22px] border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)] overflow-hidden">
+        <div className="relative rounded-[22px] border border-[#E8D49A] bg-white shadow-[0_15px_45px_rgba(138,90,10,0.08)] overflow-hidden">
 
-          <div className="absolute" />
+          {/* GOLD TOP LINE */}
+
+          <div className="h-1 bg-[#D4A017]" />
 
           <div className="p-5 sm:p-7">
 
@@ -208,17 +253,25 @@ function DataEntryDashboard({ user, onLogout }) {
 
               {/* ICON */}
 
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-2xl">
-                ⚽
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-2xl shadow-md">
+                <span>⚽</span>
               </div>
 
               <div className="flex-1">
 
-                <h2 className="text-xl font-black text-[#09251b]">
-                  Player Registration
-                </h2>
+                <div className="flex items-center gap-3">
 
-                <p className="mt-1 text-sm text-slate-400">
+                  <h2 className="text-xl font-black text-[#111111]">
+                    Player Registration
+                  </h2>
+
+                  <span className="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#D4A017] text-[#111111] text-[9px] font-black uppercase tracking-wider">
+                    New Entry
+                  </span>
+
+                </div>
+
+                <p className="mt-1 text-sm text-[#9A8F7D]">
                   नवीन खेळाडूची माहिती व्यवस्थित नोंदवा.
                 </p>
 
@@ -232,14 +285,14 @@ function DataEntryDashboard({ user, onLogout }) {
               onClick={() => {
                 setActivePage("player-form");
               }}
-              className="group mt-6 flex w-full sm:w-auto items-center justify-center gap-3 rounded-xl bg-[#063b2b] px-7 py-3.5 text-sm font-black text-white transition hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-900/10"
+              className="group mt-6 flex w-full sm:w-auto items-center justify-center gap-3 rounded-xl bg-[#111111] px-7 py-3.5 text-sm font-black text-white transition hover:bg-black hover:shadow-lg hover:shadow-black/20"
             >
 
               <span>
                 + Player माहिती भरा
               </span>
 
-              <span className="text-lg transition-transform group-hover:translate-x-1">
+              <span className="text-lg text-[#D4A017] transition-transform group-hover:translate-x-1">
                 →
               </span>
 
@@ -253,31 +306,7 @@ function DataEntryDashboard({ user, onLogout }) {
             INFO
         ========================================== */}
 
-        <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
-
-          <div className="flex gap-3">
-
-            <span className="text-lg">
-              ℹ️
-            </span>
-
-            <div>
-
-              <p className="text-sm font-bold text-[#09251b]">
-                Data Entry Access
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                Data Entry Operator नवीन Player entry
-                करू शकतो. Existing Player माहिती
-                edit करण्याचा अधिकार उपलब्ध नाही.
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
+      
 
         {/* ==========================================
             LOGOUT
@@ -287,10 +316,22 @@ function DataEntryDashboard({ user, onLogout }) {
 
           <button
             onClick={onLogout}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+            className="rounded-xl border border-[#E8D49A] bg-white px-5 py-3 text-sm font-bold text-[#6F6250] transition hover:border-[#D4A017] hover:bg-[#FFF8E5] hover:text-[#111111]"
           >
             Logout
           </button>
+
+        </div>
+
+        {/* ==========================================
+            FOOTER
+        ========================================== */}
+
+        <div className="py-8 text-center">
+
+          <p className="text-[9px] uppercase tracking-[0.25em] text-[#9A8F7D]">
+            Practice Football Club
+          </p>
 
         </div>
 
