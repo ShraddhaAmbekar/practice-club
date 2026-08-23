@@ -64,47 +64,23 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f8f6] text-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f7f5] text-slate-900 relative overflow-hidden">
 
       {/* =====================================================
-          BACKGROUND DECORATION
+          BACKGROUND
       ===================================================== */}
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
 
-        {/* Soft green glow */}
+        <div className="absolute -top-40 -left-40 w-[420px] h-[420px] rounded-full bg-emerald-100/60 blur-3xl" />
 
-        <div className="absolute -top-60 -left-40 w-[650px] h-[650px] rounded-full bg-emerald-100/60 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-green-100/50 blur-3xl" />
 
-        <div className="absolute -bottom-72 -right-40 w-[700px] h-[700px] rounded-full bg-green-100/60 blur-3xl" />
+        {/* Desktop pitch decoration */}
 
+        <div className="hidden lg:block absolute left-1/2 bottom-[-420px] -translate-x-1/2 w-[900px] h-[900px] rounded-full border border-emerald-700/[0.06]" />
 
-        {/* Football pitch circle */}
-
-        <div className="absolute left-1/2 bottom-[-420px] -translate-x-1/2 w-[900px] h-[900px] rounded-full border border-emerald-600/[0.06]" />
-
-        <div className="absolute left-1/2 bottom-[-300px] -translate-x-1/2 w-[620px] h-[620px] rounded-full border border-emerald-600/[0.05]" />
-
-        <div className="absolute left-0 right-0 bottom-[100px] border-t border-emerald-600/[0.05]" />
-
-
-        {/* Small pitch lines */}
-
-        <div className="absolute top-[25%] left-[-100px] w-[300px] h-[180px] border border-emerald-600/[0.04] rounded-r-full" />
-
-        <div className="absolute top-[15%] right-[-100px] w-[300px] h-[180px] border border-emerald-600/[0.04] rounded-l-full" />
-
-
-        {/* Grid */}
-
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "linear-gradient(#064e3b 1px, transparent 1px), linear-gradient(90deg, #064e3b 1px, transparent 1px)",
-            backgroundSize: "70px 70px",
-          }}
-        />
+        <div className="hidden lg:block absolute left-1/2 bottom-[-300px] -translate-x-1/2 w-[620px] h-[620px] rounded-full border border-emerald-700/[0.05]" />
 
       </div>
 
@@ -113,17 +89,22 @@ function Login({ onLogin }) {
           HEADER
       ===================================================== */}
 
-      <header className="relative z-20 px-5 sm:px-8 lg:px-14 py-5">
+      <header className="relative z-20 px-5 sm:px-8 lg:px-14 py-4 sm:py-5">
 
         <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-          {/* Logo */}
+          {/* LOGO */}
 
           <div className="flex items-center gap-3">
 
-            <div className="w-12 h-12 rounded-xl bg-[#063b2b] flex items-center justify-center shadow-lg shadow-emerald-900/10">
+            {/* =================================================
+                LOGO PLACEHOLDER
+                Replace this div with img later
+            ================================================= */}
 
-              <span className="text-xl font-black text-white">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#063b2b] flex items-center justify-center shadow-lg shadow-emerald-900/10">
+
+              <span className="text-lg sm:text-xl font-black text-white">
                 FC
               </span>
 
@@ -131,11 +112,11 @@ function Login({ onLogin }) {
 
             <div>
 
-              <h2 className="text-sm font-black tracking-tight text-slate-900">
+              <h2 className="text-xs sm:text-sm font-black tracking-tight text-slate-900">
                 PRACTICE FC
               </h2>
 
-              <p className="text-[9px] uppercase tracking-[0.3em] text-slate-400">
+              <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-slate-400">
                 Football Club
               </p>
 
@@ -144,17 +125,9 @@ function Login({ onLogin }) {
           </div>
 
 
-          {/* Portal status */}
+          {/* Desktop status */}
 
-          <div className="hidden sm:flex items-center gap-2">
-
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-
-            <span className="text-[9px] uppercase tracking-[0.25em] font-semibold text-slate-400">
-              Club Management Portal
-            </span>
-
-          </div>
+       
 
         </div>
 
@@ -165,7 +138,7 @@ function Login({ onLogin }) {
           MAIN
       ===================================================== */}
 
-      <main className="relative z-10 min-h-[calc(100vh-85px)] flex items-center px-5 sm:px-8 lg:px-14 pb-10">
+      <main className="relative z-10 min-h-[calc(100vh-80px)] flex items-start lg:items-center px-4 sm:px-8 lg:px-14 pt-5 sm:pt-8 lg:pt-0 pb-8">
 
         <div className="w-full max-w-7xl mx-auto">
 
@@ -173,14 +146,12 @@ function Login({ onLogin }) {
 
 
             {/* =================================================
-                LEFT SIDE
+                DESKTOP BRANDING
             ================================================= */}
 
             <section className="hidden lg:block">
 
               <div className="max-w-xl">
-
-                {/* Small heading */}
 
                 <div className="flex items-center gap-3 mb-7">
 
@@ -192,8 +163,6 @@ function Login({ onLogin }) {
 
                 </div>
 
-
-                {/* Main heading */}
 
                 <h1 className="text-6xl xl:text-7xl font-black tracking-[-0.05em] leading-[0.92] text-[#09251b]">
 
@@ -216,24 +185,17 @@ function Login({ onLogin }) {
                 </h1>
 
 
-                {/* Description */}
-
                 <p className="mt-8 max-w-md text-sm leading-7 text-slate-500">
-
                   A dedicated platform for managing
-                  your football club, players, matches,
-                  events and everything that keeps
-                  the team moving forward.
-
+                  your football club, players, events
+                  and everything that keeps the team
+                  moving forward.
                 </p>
 
-
-                {/* Stats */}
 
                 <div className="mt-12 flex items-center gap-8">
 
                   <div>
-
                     <p className="text-xl font-black text-[#09251b]">
                       TEAM
                     </p>
@@ -241,15 +203,11 @@ function Login({ onLogin }) {
                     <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-slate-400">
                       Together
                     </p>
-
                   </div>
-
 
                   <div className="h-9 w-px bg-slate-200" />
 
-
                   <div>
-
                     <p className="text-xl font-black text-[#09251b]">
                       DRIVE
                     </p>
@@ -257,15 +215,11 @@ function Login({ onLogin }) {
                     <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-slate-400">
                       Forward
                     </p>
-
                   </div>
-
 
                   <div className="h-9 w-px bg-slate-200" />
 
-
                   <div>
-
                     <p className="text-xl font-black text-[#09251b]">
                       LEGACY
                     </p>
@@ -273,40 +227,7 @@ function Login({ onLogin }) {
                     <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-slate-400">
                       Forever
                     </p>
-
                   </div>
-
-                </div>
-
-
-                {/* Football pitch decoration */}
-
-                <div className="mt-14 flex items-center gap-4">
-
-                  <div className="relative w-24 h-14 rounded-xl border border-emerald-600/10 bg-white shadow-sm overflow-hidden">
-
-                    {/* center line */}
-
-                    <div className="absolute left-1/2 top-0 bottom-0 border-l border-emerald-600/10" />
-
-                    {/* center circle */}
-
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-emerald-600/15" />
-
-                    {/* left box */}
-
-                    <div className="absolute left-0 top-3 w-5 h-8 border border-emerald-600/10 border-l-0" />
-
-                    {/* right box */}
-
-                    <div className="absolute right-0 top-3 w-5 h-8 border border-emerald-600/10 border-r-0" />
-
-                  </div>
-
-
-                  <span className="text-[9px] uppercase tracking-[0.25em] text-slate-400">
-                    Built for the game
-                  </span>
 
                 </div>
 
@@ -316,40 +237,77 @@ function Login({ onLogin }) {
 
 
             {/* =================================================
-                LOGIN CARD
+                LOGIN AREA
             ================================================= */}
 
             <section className="w-full max-w-md mx-auto">
 
+              {/* =================================================
+                  MOBILE BRANDING
+              ================================================= */}
+
+              <div className="lg:hidden text-center mb-6 sm:mb-8">
+
+                {/* Logo */}
+
+                <div className="mx-auto mb-4 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#063b2b] flex items-center justify-center shadow-xl shadow-emerald-900/15">
+
+                  {/* Replace FC with actual logo image later */}
+
+                  <span className="text-2xl sm:text-3xl font-black text-white">
+                    FC
+                  </span>
+
+                </div>
+
+
+                <h1 className="text-2xl sm:text-3xl font-black tracking-[-0.03em] text-[#09251b]">
+                  PRACTICE FOOTBALL CLUB
+                </h1>
+
+
+                <div className="mt-2 flex items-center justify-center gap-2">
+
+                  <span className="w-6 h-[1px] bg-emerald-500" />
+
+                  <p className="text-[9px] uppercase tracking-[0.25em] font-bold text-emerald-700">
+                    Official Club Portal
+                  </p>
+
+                  <span className="w-6 h-[1px] bg-emerald-500" />
+
+                </div>
+
+              </div>
+
+
+              {/* =================================================
+                  CARD
+              ================================================= */}
+
               <div className="relative">
 
-                {/* Card shadow/glow */}
+                <div className="absolute -inset-1 sm:-inset-2 bg-emerald-200/30 blur-2xl rounded-[28px]" />
 
-                <div className="absolute -inset-2 bg-emerald-200/40 blur-2xl rounded-[30px]" />
+                <div className="relative bg-white rounded-[22px] sm:rounded-[26px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.10)] overflow-hidden">
 
+                  {/* Accent */}
 
-                <div className="relative bg-white rounded-[26px] border border-slate-200 shadow-[0_25px_80px_rgba(15,23,42,0.10)] overflow-hidden">
-
-
-                  {/* Top accent */}
-
-                  <div className="h-1 bg-gradient-to-r from-emerald-700 via-emerald-500 to-green-400" />
+                  <div className="h-1 bg-gradient-to-r from-emerald-800 via-emerald-500 to-green-400" />
 
 
-                  <div className="p-7 sm:p-9">
+                  <div className="p-5 sm:p-8 md:p-9">
 
 
                     {/* =================================================
                         CARD HEADER
                     ================================================= */}
 
-                    <div className="mb-8">
+                    <div className="mb-6 sm:mb-8">
 
                       <div className="flex items-center justify-between">
 
-                        {/* Login icon */}
-
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
 
                           <svg
                             viewBox="0 0 24 24"
@@ -374,26 +332,26 @@ function Login({ onLogin }) {
                         </div>
 
 
-                        <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-slate-300">
+                        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.22em] font-bold text-slate-300">
                           Secure Access
                         </span>
 
                       </div>
 
 
-                      <p className="mt-7 text-[10px] uppercase tracking-[0.3em] text-emerald-700 font-black">
+                      <p className="mt-5 sm:mt-7 text-[9px] uppercase tracking-[0.3em] text-emerald-700 font-black">
                         Management Portal
                       </p>
 
 
-                      <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">
+                      <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
                         Welcome back.
                       </h2>
 
 
-                      <p className="mt-3 text-sm leading-6 text-slate-500">
-                        Sign in to manage your club
-                        and keep your team moving forward.
+                      <p className="mt-2 sm:mt-3 text-sm leading-6 text-slate-500">
+                        Sign in to access your club
+                        management system.
                       </p>
 
                     </div>
@@ -405,15 +363,14 @@ function Login({ onLogin }) {
 
                     <form
                       onSubmit={handleSubmit}
-                      className="space-y-5"
+                      className="space-y-4 sm:space-y-5"
                     >
-
 
                       {/* USERNAME */}
 
                       <div>
 
-                        <label className="block mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <label className="block mb-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
                           Username
                         </label>
 
@@ -450,7 +407,7 @@ function Login({ onLogin }) {
                             }
                             placeholder="Enter your username"
                             autoComplete="username"
-                            className="w-full h-14 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                            className="w-full h-14 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
                           />
 
                         </div>
@@ -462,7 +419,7 @@ function Login({ onLogin }) {
 
                       <div>
 
-                        <label className="block mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <label className="block mb-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
                           Password
                         </label>
 
@@ -505,7 +462,7 @@ function Login({ onLogin }) {
                             }
                             placeholder="Enter your password"
                             autoComplete="current-password"
-                            className="w-full h-14 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                            className="w-full h-14 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-16 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-300 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
                           />
 
 
@@ -514,9 +471,11 @@ function Login({ onLogin }) {
                             onClick={() =>
                               setShowPassword(!showPassword)
                             }
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] uppercase tracking-widest font-bold text-slate-400 hover:text-emerald-600 transition"
+                            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 min-w-[48px] min-h-[42px] flex items-center justify-center text-[9px] uppercase tracking-widest font-bold text-slate-400 hover:text-emerald-600 transition"
                           >
-                            {showPassword ? "Hide" : "Show"}
+                            {showPassword
+                              ? "Hide"
+                              : "Show"}
                           </button>
 
                         </div>
@@ -528,7 +487,7 @@ function Login({ onLogin }) {
 
                       {error && (
 
-                        <div className="flex gap-3 items-start rounded-xl border border-red-200 bg-red-50 px-4 py-3.5">
+                        <div className="flex gap-3 items-start rounded-xl border border-red-200 bg-red-50 px-4 py-3">
 
                           <div className="mt-0.5 w-5 h-5 shrink-0 rounded-full bg-red-100 flex items-center justify-center">
 
@@ -552,10 +511,10 @@ function Login({ onLogin }) {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="group relative w-full h-14 mt-2 overflow-hidden rounded-xl bg-[#063b2b] text-white font-black text-xs tracking-[0.15em] uppercase transition-all duration-300 hover:bg-emerald-700 hover:shadow-[0_12px_30px_rgba(5,150,105,0.20)] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="group w-full h-14 mt-2 overflow-hidden rounded-xl bg-[#063b2b] text-white font-black text-xs tracking-[0.15em] uppercase transition-all duration-300 hover:bg-emerald-700 hover:shadow-[0_12px_30px_rgba(5,150,105,0.20)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
 
-                        <span className="relative z-10 flex items-center justify-center gap-3">
+                        <span className="flex items-center justify-center gap-3">
 
                           {loading ? (
                             <>
@@ -584,7 +543,7 @@ function Login({ onLogin }) {
                         FOOTER
                     ================================================= */}
 
-                    <div className="mt-8 pt-6 border-t border-slate-100">
+                    <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-slate-100">
 
                       <div className="flex items-center justify-between">
 
@@ -592,14 +551,14 @@ function Login({ onLogin }) {
 
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
 
-                          <span className="text-[9px] uppercase tracking-[0.18em] text-slate-400">
+                          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-slate-400">
                             Protected Portal
                           </span>
 
                         </div>
 
 
-                        <span className="text-[9px] uppercase tracking-[0.18em] text-slate-300">
+                        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-slate-300">
                           Practice FC
                         </span>
 
@@ -626,9 +585,9 @@ function Login({ onLogin }) {
           FOOTER
       ===================================================== */}
 
-      <footer className="relative z-10 pb-5 text-center">
+      <footer className="relative z-10 pb-4 sm:pb-5 text-center px-4">
 
-        <p className="text-[9px] uppercase tracking-[0.25em] text-slate-400">
+        <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400">
           Authorized Management Access • Practice Football Club
         </p>
 

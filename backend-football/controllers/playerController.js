@@ -12,7 +12,7 @@ const createPlayer = async (req, res) => {
       fullName,
       nickname,
       birthDate,
-      whatsappNumber,
+      contactNumber,
       alternateContactNumber,
       foodPreference,
       footballStartedYear,
@@ -25,24 +25,81 @@ const createPlayer = async (req, res) => {
       relativesInPracticeClub,
     } = req.body;
 
-    // Full Name required
+    // ==========================================
+    // FULL NAME VALIDATION
+    // ==========================================
+
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({
         message: "पूर्ण नाव आवश्यक आहे.",
       });
     }
 
-    // Create player
+    // ==========================================
+    // NORMALIZE DATA FOR DUPLICATE CHECK
+    // ==========================================
+
+    const normalizedName = fullName
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+    const normalizedcontact = contactNumber
+      ? contactNumber.trim()
+      : "";
+
+
+    let existingPlayer = null;
+
+    if (birthDate && normalizedcontact) {
+      const startOfDay = new Date(birthDate);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(birthDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      existingPlayer = await Player.findOne({
+        fullName: {
+          $regex: `^${normalizedName}$`,
+          $options: "i",
+        },
+
+        birthDate: {
+          $gte: startOfDay,
+          $lte: endOfDay,
+        },
+
+        contactNumber: normalizedcontact,
+      });
+    }
+
+    // ==========================================
+    // DUPLICATE FOUND
+    // ==========================================
+
+    if (existingPlayer) {
+      return res.status(409).json({
+        message:
+          "हा Player आधीच नोंदवलेला आहे. Duplicate entry करता येणार नाही.",
+      });
+    }
+
+    // ==========================================
+    // CREATE PLAYER
+    // ==========================================
+
     const player = await Player.create({
       photo: photo || "",
 
-      fullName: fullName.trim(),
+      fullName: fullName
+        .trim()
+        .replace(/\s+/g, " "),
 
       nickname: nickname || "",
 
       birthDate: birthDate || null,
 
-      whatsappNumber: whatsappNumber || "",
+      contactNumber: normalizedcontact,
 
       alternateContactNumber:
         alternateContactNumber || "",
@@ -89,7 +146,10 @@ const createPlayer = async (req, res) => {
       createdBy: req.user.id,
     });
 
-    // createdBy चे user details populate
+    // ==========================================
+    // POPULATE CREATED BY
+    // ==========================================
+
     const populatedPlayer =
       await Player.findById(player._id).populate(
         "createdBy",
@@ -99,6 +159,7 @@ const createPlayer = async (req, res) => {
     return res.status(201).json({
       message:
         "Player माहिती यशस्वीपणे save झाली.",
+
       player: populatedPlayer,
     });
   } catch (error) {
@@ -110,6 +171,7 @@ const createPlayer = async (req, res) => {
     return res.status(500).json({
       message:
         "Player माहिती save करताना error आला.",
+
       error: error.message,
     });
   }
@@ -143,6 +205,7 @@ const getPlayers = async (req, res) => {
     return res.status(500).json({
       message:
         "Players fetch करताना error आला.",
+
       error: error.message,
     });
   }
@@ -180,6 +243,7 @@ const getPlayerById = async (req, res) => {
     return res.status(500).json({
       message:
         "Player माहिती fetch करताना error आला.",
+
       error: error.message,
     });
   }
@@ -198,7 +262,7 @@ const updatePlayer = async (req, res) => {
       fullName,
       nickname,
       birthDate,
-      whatsappNumber,
+      contactNumber,
       alternateContactNumber,
       foodPreference,
       footballStartedYear,
@@ -211,24 +275,35 @@ const updatePlayer = async (req, res) => {
       relativesInPracticeClub,
     } = req.body;
 
-    // Full Name validation
+    // ==========================================
+    // FULL NAME VALIDATION
+    // ==========================================
+
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({
         message: "पूर्ण नाव आवश्यक आहे.",
       });
     }
 
+    // ==========================================
+    // UPDATE DATA
+    // ==========================================
+
     const updateData = {
       photo: photo || "",
 
-      fullName: fullName.trim(),
+      fullName: fullName
+        .trim()
+        .replace(/\s+/g, " "),
 
       nickname: nickname || "",
 
       birthDate: birthDate || null,
 
-      whatsappNumber:
-        whatsappNumber || "",
+      contactNumber:
+        contactNumber
+          ? contactNumber.trim()
+          : "",
 
       alternateContactNumber:
         alternateContactNumber || "",
@@ -273,6 +348,10 @@ const updatePlayer = async (req, res) => {
       updatedAt: new Date(),
     };
 
+    // ==========================================
+    // UPDATE PLAYER
+    // ==========================================
+
     const player =
       await Player.findByIdAndUpdate(
         req.params.id,
@@ -295,6 +374,7 @@ const updatePlayer = async (req, res) => {
     return res.status(200).json({
       message:
         "Player माहिती यशस्वीपणे update झाली.",
+
       player,
     });
   } catch (error) {
@@ -306,6 +386,7 @@ const updatePlayer = async (req, res) => {
     return res.status(500).json({
       message:
         "Player update करताना error आला.",
+
       error: error.message,
     });
   }
@@ -343,6 +424,7 @@ const deletePlayer = async (req, res) => {
     return res.status(500).json({
       message:
         "Player delete करताना error आला.",
+
       error: error.message,
     });
   }

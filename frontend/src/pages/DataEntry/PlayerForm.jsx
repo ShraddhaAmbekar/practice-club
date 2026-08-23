@@ -1,109 +1,113 @@
 import { useEffect, useState } from "react";
-import "./PlayerForm.css";
-
 
 function PlayerForm({ player, onSave, onCancel }) {
-  const [form, setForm] = useState({
+  const getInitialForm = () => ({
     photo: "",
     fullName: "",
     nickname: "",
     birthDate: "",
-    whatsappNumber: "",
+    contactNumber: "",
     alternateContactNumber: "",
-
     foodPreference: "",
-
     footballStartedYear: "",
-
     practiceClubFromYear: "",
     practiceClubToYear: "",
     currentlyPlayingAtPracticeClub: false,
-
     playingPosition: "",
-
     memorableCompetitions: [],
-
     hasRelativesInPracticeClub: false,
-
     relativesInPracticeClub: [],
   });
 
-  const [competition, setCompetition] =
-    useState("");
+  const [form, setForm] = useState(getInitialForm);
 
-  const [relative, setRelative] =
-    useState({
+  const [competition, setCompetition] = useState("");
+
+  const [relative, setRelative] = useState({
+    name: "",
+    relation: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // =========================================================
+  // LOAD PLAYER FOR ADMIN EDIT
+  // =========================================================
+
+  useEffect(() => {
+    if (!player) {
+      setForm(getInitialForm());
+      setCompetition("");
+      setRelative({
+        name: "",
+        relation: "",
+      });
+      setMessage("");
+      return;
+    }
+
+    setForm({
+      photo: player.photo || "",
+
+      fullName: player.fullName || "",
+
+      nickname: player.nickname || "",
+
+      birthDate: player.birthDate
+        ? player.birthDate.split("T")[0]
+        : "",
+
+      contactNumber: player.contactNumber || "",
+
+      alternateContactNumber:
+        player.alternateContactNumber || "",
+
+      foodPreference:
+        player.foodPreference || "",
+
+      footballStartedYear:
+        player.footballStartedYear || "",
+
+      practiceClubFromYear:
+        player.practiceClubFromYear || "",
+
+      practiceClubToYear:
+        player.practiceClubToYear || "",
+
+      currentlyPlayingAtPracticeClub:
+        Boolean(player.currentlyPlayingAtPracticeClub),
+
+      playingPosition:
+        player.playingPosition || "",
+
+      memorableCompetitions:
+        Array.isArray(player.memorableCompetitions)
+          ? player.memorableCompetitions
+          : [],
+
+      hasRelativesInPracticeClub:
+        Boolean(player.hasRelativesInPracticeClub),
+
+      relativesInPracticeClub:
+        Array.isArray(player.relativesInPracticeClub)
+          ? player.relativesInPracticeClub
+          : [],
+    });
+
+    setCompetition("");
+
+    setRelative({
       name: "",
       relation: "",
     });
 
-  const [loading, setLoading] =
-    useState(false);
+    setMessage("");
+  }, [player]);
 
-  const [message, setMessage] =
-    useState("");
-
-
-
-
-useEffect(() => {
-  if (!player) return;
-
-  setForm({
-    photo: player.photo || "",
-    fullName: player.fullName || "",
-    nickname: player.nickname || "",
-    birthDate: player.birthDate
-      ? player.birthDate.split("T")[0]
-      : "",
-    whatsappNumber:
-      player.whatsappNumber || "",
-    alternateContactNumber:
-      player.alternateContactNumber || "",
-
-    foodPreference:
-      player.foodPreference || "",
-
-    footballStartedYear:
-      player.footballStartedYear || "",
-
-    practiceClubFromYear:
-      player.practiceClubFromYear || "",
-
-    practiceClubToYear:
-      player.practiceClubToYear || "",
-
-    currentlyPlayingAtPracticeClub:
-      Boolean(
-        player.currentlyPlayingAtPracticeClub
-      ),
-
-    playingPosition:
-      player.playingPosition || "",
-
-    memorableCompetitions:
-      Array.isArray(
-        player.memorableCompetitions
-      )
-        ? player.memorableCompetitions
-        : [],
-
-    hasRelativesInPracticeClub:
-      Boolean(
-        player.hasRelativesInPracticeClub
-      ),
-
-    relativesInPracticeClub:
-      Array.isArray(
-        player.relativesInPracticeClub
-      )
-        ? player.relativesInPracticeClub
-        : [],
-  });
-}, [player]);
-  // ==========================================
+  // =========================================================
   // HANDLE INPUT
-  // ==========================================
+  // =========================================================
 
   const handleChange = (e) => {
     const {
@@ -122,14 +126,35 @@ useEffect(() => {
     }));
   };
 
-  // ==========================================
+  // =========================================================
   // PHOTO
-  // ==========================================
+  // =========================================================
 
   const handlePhotoChange = (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
+
+    // 5 MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage(
+        "Photo size 5 MB पेक्षा कमी असावी."
+      );
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setMessage(
+        "फक्त JPG, PNG किंवा WEBP image वापरा."
+      );
+      return;
+    }
 
     const reader = new FileReader();
 
@@ -138,19 +163,32 @@ useEffect(() => {
         ...prev,
         photo: reader.result,
       }));
+
+      setMessage("");
     };
 
     reader.readAsDataURL(file);
   };
 
-  // ==========================================
+  // =========================================================
   // COMPETITION ADD
-  // ==========================================
+  // =========================================================
 
   const addCompetition = () => {
     const value = competition.trim();
 
-    if (!value) return;
+    if (!value) {
+      return;
+    }
+
+    if (
+      form.memorableCompetitions.includes(value)
+    ) {
+      setMessage(
+        "ही competition आधीच add केली आहे."
+      );
+      return;
+    }
 
     setForm((prev) => ({
       ...prev,
@@ -161,16 +199,16 @@ useEffect(() => {
     }));
 
     setCompetition("");
+    setMessage("");
   };
 
-  // ==========================================
+  // =========================================================
   // COMPETITION DELETE
-  // ==========================================
+  // =========================================================
 
   const removeCompetition = (index) => {
     setForm((prev) => ({
       ...prev,
-
       memorableCompetitions:
         prev.memorableCompetitions.filter(
           (_, i) => i !== index
@@ -178,9 +216,9 @@ useEffect(() => {
     }));
   };
 
-  // ==========================================
+  // =========================================================
   // RELATIVE INPUT
-  // ==========================================
+  // =========================================================
 
   const handleRelativeChange = (e) => {
     const {
@@ -194,32 +232,31 @@ useEffect(() => {
     }));
   };
 
-  // ==========================================
+  // =========================================================
   // ADD RELATIVE
-  // ==========================================
+  // =========================================================
 
   const addRelative = () => {
     if (
       !relative.name.trim() ||
       !relative.relation.trim()
     ) {
-      alert(
+      setMessage(
         "नातेवाईकाचे नाव आणि नाते भरा."
       );
-
       return;
     }
 
+    const newRelative = {
+      name: relative.name.trim(),
+      relation: relative.relation.trim(),
+    };
+
     setForm((prev) => ({
       ...prev,
-
       relativesInPracticeClub: [
         ...prev.relativesInPracticeClub,
-        {
-          name: relative.name.trim(),
-          relation:
-            relative.relation.trim(),
-        },
+        newRelative,
       ],
     }));
 
@@ -227,16 +264,17 @@ useEffect(() => {
       name: "",
       relation: "",
     });
+
+    setMessage("");
   };
 
-  // ==========================================
+  // =========================================================
   // DELETE RELATIVE
-  // ==========================================
+  // =========================================================
 
   const removeRelative = (index) => {
     setForm((prev) => ({
       ...prev,
-
       relativesInPracticeClub:
         prev.relativesInPracticeClub.filter(
           (_, i) => i !== index
@@ -244,262 +282,302 @@ useEffect(() => {
     }));
   };
 
-  // ==========================================
+  // =========================================================
+  // VALIDATE PHONE
+  // =========================================================
+
+  const isValidPhone = (number) => {
+    return /^[6-9]\d{9}$/.test(
+      number.trim()
+    );
+  };
+
+  // =========================================================
   // SUBMIT
-  // ==========================================
+  // =========================================================
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  setMessage("");
+    setMessage("");
 
-  console.log("1. Submit started");
-  console.log("Form data:", form);
-  console.log("Edit player:", player);
+    // -------------------------------------------------------
+    // BASIC VALIDATION
+    // -------------------------------------------------------
 
-  // ==========================================
-  // BASIC VALIDATION
-  // ==========================================
-
-  if (!form.fullName.trim()) {
-    setMessage("कृपया पूर्ण नाव भरा.");
-    return;
-  }
-
-  if (!form.whatsappNumber.trim()) {
-    setMessage("कृपया WhatsApp Number भरा.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    // ==========================================
-    // GET JWT TOKEN
-    // ==========================================
-
-    const token = localStorage.getItem("token");
-
-    console.log("2. Token:", token);
-
-    if (!token) {
+    if (!form.fullName.trim()) {
       setMessage(
-        "Login session सापडले नाही. कृपया पुन्हा Login करा."
+        "कृपया पूर्ण नाव भरा."
       );
       return;
     }
 
-    // ==========================================
-    // CREATE OR UPDATE
-    // ==========================================
-
-    const url = player
-      ? `http://localhost:5000/api/players/${player._id}`
-      : "http://localhost:5000/api/players";
-
-    const method = player ? "PUT" : "POST";
-
-    console.log("3. Request URL:", url);
-    console.log("4. Request method:", method);
-    console.log("5. Sending request to backend...");
-
-    const response = await fetch(url, {
-      method: method,
-
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: JSON.stringify(form),
-    });
-
-    console.log(
-      "6. Response status:",
-      response.status
-    );
-
-    const data = await response.json();
-
-    console.log(
-      "7. Backend response:",
-      data
-    );
-
-    // ==========================================
-    // ERROR
-    // ==========================================
-
-    if (!response.ok) {
-      throw new Error(
-        data.message ||
-          (
-            player
-              ? "Player माहिती update करताना error आला."
-              : "Player माहिती save करताना error आला."
-          )
+    if (!form.contactNumber.trim()) {
+      setMessage(
+        "कृपया contact Number भरा."
       );
+      return;
     }
 
-    // ==========================================
-    // SUCCESS
-    // ==========================================
-
-    console.log(
-      player
-        ? "8. Player updated successfully"
-        : "8. Player saved successfully"
-    );
-
-    setMessage(
-      player
-        ? "✓ Player माहिती यशस्वीपणे update झाली."
-        : "✓ Player माहिती यशस्वीपणे save झाली."
-    );
-
-    // ==========================================
-    // SEND UPDATED PLAYER TO PARENT
-    // ==========================================
-
-    if (onSave) {
-      onSave(data.player);
+    if (
+      !isValidPhone(
+        form.contactNumber
+      )
+    ) {
+      setMessage(
+        "कृपया योग्य 10 अंकी contact Number भरा."
+      );
+      return;
     }
 
-    // ==========================================
-    // RESET ONLY AFTER CREATE
-    // ==========================================
-
-    if (!player) {
-      setForm({
-        photo: "",
-        fullName: "",
-        nickname: "",
-        birthDate: "",
-        whatsappNumber: "",
-        alternateContactNumber: "",
-
-        foodPreference: "",
-
-        footballStartedYear: "",
-
-        practiceClubFromYear: "",
-        practiceClubToYear: "",
-        currentlyPlayingAtPracticeClub: false,
-
-        playingPosition: "",
-
-        memorableCompetitions: [],
-
-        hasRelativesInPracticeClub: false,
-
-        relativesInPracticeClub: [],
-      });
-
-      // Reset competition
-      setCompetition("");
-
-      // Reset relative
-      setRelative({
-        name: "",
-        relation: "",
-      });
+    if (
+      form.alternateContactNumber &&
+      !isValidPhone(
+        form.alternateContactNumber
+      )
+    ) {
+      setMessage(
+        "कृपया योग्य Alternate Contact Number भरा."
+      );
+      return;
     }
 
-  } catch (error) {
-    console.error(
-      "9. Player submit error:",
-      error
-    );
+    if (
+      form.practiceClubFromYear &&
+      form.practiceClubToYear &&
+      !form.currentlyPlayingAtPracticeClub &&
+      Number(form.practiceClubToYear) <
+        Number(form.practiceClubFromYear)
+    ) {
+      setMessage(
+        "Practice Club चे शेवटचे वर्ष हे प्रवेश वर्षापेक्षा कमी असू शकत नाही."
+      );
+      return;
+    }
 
-    setMessage(
-      error.message ||
-        (
-          player
-            ? "Player माहिती update करताना error आला."
-            : "Player माहिती save करताना error आला."
-        )
-    );
+    try {
+      setLoading(true);
 
-  } finally {
-    setLoading(false);
-  }
-};
-  // ==========================================
+      // -------------------------------------------------------
+      // GET TOKEN
+      // -------------------------------------------------------
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        setMessage(
+          "Login session सापडले नाही. कृपया पुन्हा Login करा."
+        );
+        return;
+      }
+
+      // -------------------------------------------------------
+      // CREATE / UPDATE
+      // -------------------------------------------------------
+
+      const isEdit = Boolean(
+        player?._id
+      );
+
+      const url = isEdit
+        ? `http://localhost:5000/api/players/${player._id}`
+        : "http://localhost:5000/api/players";
+
+      const method = isEdit
+        ? "PUT"
+        : "POST";
+
+      console.log(
+        "Player request:",
+        {
+          url,
+          method,
+          isEdit,
+          form,
+        }
+      );
+
+      // -------------------------------------------------------
+      // API REQUEST
+      // -------------------------------------------------------
+
+      const response = await fetch(
+        url,
+        {
+          method,
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+
+          body: JSON.stringify(form),
+        }
+      );
+
+      // -------------------------------------------------------
+      // RESPONSE
+      // -------------------------------------------------------
+
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      console.log(
+        "Backend response:",
+        data
+      );
+
+      // -------------------------------------------------------
+      // ERROR
+      // -------------------------------------------------------
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            (
+              isEdit
+                ? "Player माहिती update करताना error आला."
+                : "Player माहिती save करताना error आला."
+            )
+        );
+      }
+
+      // -------------------------------------------------------
+      // SUCCESS
+      // -------------------------------------------------------
+
+      setMessage(
+        isEdit
+          ? "✓ Player माहिती यशस्वीपणे update झाली."
+          : "✓ Player माहिती यशस्वीपणे save झाली."
+      );
+
+      // -------------------------------------------------------
+      // SEND DATA TO PARENT
+      // -------------------------------------------------------
+
+      if (onSave) {
+        onSave(
+          data.player || data
+        );
+      }
+
+      // -------------------------------------------------------
+      // RESET AFTER NEW ENTRY
+      // -------------------------------------------------------
+
+      if (!isEdit) {
+        setForm(getInitialForm());
+
+        setCompetition("");
+
+        setRelative({
+          name: "",
+          relation: "",
+        });
+      }
+    } catch (error) {
+      console.error(
+        "Player submit error:",
+        error
+      );
+
+      setMessage(
+        error.message ||
+          "Something went wrong."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================================================
   // UI
-  // ==========================================
+  // =========================================================
 
   return (
-    <div className="page">
+    <div className="min-h-screen bg-[#f5f8f6] text-slate-900 px-4 py-6 sm:px-6 lg:px-10">
 
-      {/* HEADER */}
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
 
-      <div className="page-header">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
 
-        <div>
-          <h2>
-            Player माहिती भरा
-          </h2>
+        <div className="absolute -top-60 -right-60 h-[600px] w-[600px] rounded-full bg-emerald-100/50 blur-3xl" />
 
-          <p>
-            Practice Football Club
-            खेळाडूची माहिती नोंदवा
-          </p>
-        </div>
+        <div className="absolute -bottom-60 -left-60 h-[600px] w-[600px] rounded-full bg-green-100/40 blur-3xl" />
+
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage:
+              "linear-gradient(#064e3b 1px, transparent 1px), linear-gradient(90deg, #064e3b 1px, transparent 1px)",
+            backgroundSize:
+              "70px 70px",
+          }}
+        />
 
       </div>
 
-      <form
-        className="player-form"
-        onSubmit={handleSubmit}
-      >
+      <div className="relative z-10 max-w-5xl mx-auto">
 
-        {/* ================================= */}
-        {/* PHOTO */}
-        {/* ================================= */}
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
-        <div className="form-section">
+        <div className="mb-6">
 
-          <div className="section-header">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
             <div>
-              <h2>
-                छायाचित्र
-              </h2>
 
-              <p>
-                खेळाडूचे छायाचित्र निवडा
+              <div className="flex items-center gap-3 mb-2">
+
+                <div className="h-9 w-1 rounded-full bg-emerald-600" />
+
+                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-700">
+                  Practice Football Club
+                </span>
+
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#09251b]">
+
+                {player
+                  ? "Edit Player"
+                  : "Player Registration"}
+
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-500">
+
+                {player
+                  ? "खेळाडूची माहिती update करा."
+                  : "खेळाडूची माहिती व्यवस्थित नोंदवा."}
+
               </p>
+
             </div>
 
-          </div>
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 shadow-sm">
 
-          <div className="photo-upload">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
 
-            {form.photo ? (
-              <img
-                src={form.photo}
-                alt="Player"
-                className="player-preview"
-              />
-            ) : (
-              <div className="photo-placeholder">
-                ⚽
-              </div>
-            )}
-
-            <div>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={
-                  handlePhotoChange
-                }
-              />
-
-              <p className="form-help">
-                JPG, PNG किंवा WEBP
-              </p>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                {player
+                  ? "Admin Edit"
+                  : "New Entry"}
+              </span>
 
             </div>
 
@@ -507,306 +585,214 @@ const handleSubmit = async (e) => {
 
         </div>
 
-        {/* ================================= */}
-        {/* PERSONAL INFORMATION */}
-        {/* ================================= */}
+        {/* =====================================================
+            FORM
+        ===================================================== */}
 
-        <div className="form-section">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
 
-          <div className="section-header">
+          {/* ===================================================
+              PHOTO
+          =================================================== */}
 
-            <div>
-              <h2>
-                वैयक्तिक माहिती
-              </h2>
+          <FormSection
+            number="01"
+            title="छायाचित्र"
+            subtitle="खेळाडूचे छायाचित्र"
+          >
 
-              <p>
-                खेळाडूची मूलभूत माहिती
-              </p>
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+
+              <div className="relative">
+
+                {form.photo ? (
+
+                  <img
+                    src={form.photo}
+                    alt="Player"
+                    className="h-32 w-32 rounded-2xl object-cover border-4 border-white shadow-lg"
+                  />
+
+                ) : (
+
+                  <div className="h-32 w-32 rounded-2xl bg-[#063b2b] flex items-center justify-center shadow-lg">
+
+                    <span className="text-4xl">
+                      ⚽
+                    </span>
+
+                  </div>
+
+                )}
+
+              </div>
+
+              <div className="flex-1 w-full">
+
+                <label className="block mb-2 text-xs font-bold text-slate-600">
+                  Player Photo
+                </label>
+
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handlePhotoChange}
+                  className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:font-bold file:text-emerald-700 hover:border-emerald-300"
+                />
+
+                <p className="mt-2 text-xs text-slate-400">
+                  JPG, PNG किंवा WEBP. Maximum 5 MB.
+                </p>
+
+              </div>
+
             </div>
 
-          </div>
+          </FormSection>
 
-          <div className="form-row">
+          {/* ===================================================
+              PERSONAL INFORMATION
+          =================================================== */}
 
-            <div className="form-group">
+          <FormSection
+            number="02"
+            title="वैयक्तिक माहिती"
+            subtitle="खेळाडूची मूलभूत माहिती"
+          >
 
-              <label>
-                पूर्ण नाव *
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-              <input
-                type="text"
+              <InputField
+                label="पूर्ण नाव *"
                 name="fullName"
                 value={form.fullName}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
                 placeholder="पूर्ण नाव"
                 required
               />
 
-            </div>
-
-            <div className="form-group">
-
-              <label>
-                टोपण नाव
-              </label>
-
-              <input
-                type="text"
+              <InputField
+                label="टोपण नाव"
                 name="nickname"
                 value={form.nickname}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
                 placeholder="टोपण नाव"
               />
 
-            </div>
-
-          </div>
-
-          <div className="form-row">
-
-            <div className="form-group">
-
-              <label>
-                जन्मतारीख
-              </label>
-
-              <input
+              <InputField
+                label="जन्मतारीख"
                 type="date"
                 name="birthDate"
                 value={form.birthDate}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
               />
 
-            </div>
-
-            <div className="form-group">
-
-              <label>
-                WhatsApp Number *
-              </label>
-
-              <input
+              <InputField
+                label="contact Number *"
                 type="tel"
-                name="whatsappNumber"
-                value={
-                  form.whatsappNumber
-                }
-                onChange={
-                  handleChange
-                }
+                name="contactNumber"
+                value={form.contactNumber}
+                onChange={handleChange}
                 placeholder="10 अंकी क्रमांक"
                 maxLength="10"
+                inputMode="numeric"
                 required
               />
 
-            </div>
-
-          </div>
-
-          <div className="form-row">
-
-            <div className="form-group">
-
-              <label>
-                Alternate Contact Number
-              </label>
-
-              <input
+              <InputField
+                label="Alternate Contact Number"
                 type="tel"
                 name="alternateContactNumber"
-                value={
-                  form.alternateContactNumber
-                }
-                onChange={
-                  handleChange
-                }
+                value={form.alternateContactNumber}
+                onChange={handleChange}
                 placeholder="पर्यायी संपर्क क्रमांक"
                 maxLength="10"
+                inputMode="numeric"
               />
 
-            </div>
-
-            <div className="form-group">
-
-              <label>
-                आहार प्रकार
-              </label>
-
-              <select
+              <SelectField
+                label="आहार प्रकार"
                 name="foodPreference"
-                value={
-                  form.foodPreference
-                }
-                onChange={
-                  handleChange
-                }
-              >
-
-                <option value="">
-                  निवडा
-                </option>
-
-                <option value="Veg">
-                  शाकाहारी (Veg)
-                </option>
-
-                <option value="Non-Veg">
-                  मांसाहारी (Non-Veg)
-                </option>
-
-              </select>
+                value={form.foodPreference}
+                onChange={handleChange}
+                options={[
+                  ["", "निवडा"],
+                  ["Veg", "शाकाहारी (Veg)"],
+                  [
+                    "Non-Veg",
+                    "मांसाहारी (Non-Veg)",
+                  ],
+                ]}
+              />
 
             </div>
 
-          </div>
+          </FormSection>
 
-        </div>
+          {/* ===================================================
+              FOOTBALL INFORMATION
+          =================================================== */}
 
-        {/* ================================= */}
-        {/* FOOTBALL INFORMATION */}
-        {/* ================================= */}
+          <FormSection
+            number="03"
+            title="Football माहिती"
+            subtitle="खेळाडूच्या Football प्रवासाची माहिती"
+          >
 
-        <div className="form-section">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          <div className="section-header">
-
-            <div>
-
-              <h2>
-                Football माहिती
-              </h2>
-
-              <p>
-                खेळाडूच्या Football
-                प्रवासाची माहिती
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="form-row">
-
-            <div className="form-group">
-
-              <label>
-                Football सुरू केलेले वर्ष
-              </label>
-
-              <input
-                type="number"
+              <YearSelectField
+                label="Football सुरू केलेले वर्ष"
                 name="footballStartedYear"
-                value={
-                  form.footballStartedYear
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="उदा. 2010"
-                min="1900"
-                max="2100"
+                value={form.footballStartedYear}
+                onChange={handleChange}
               />
 
-            </div>
-
-            <div className="form-group">
-
-              <label>
-                खेळातील प्रमुख स्थान
-              </label>
-
-              <select
+              <SelectField
+                label="खेळातील प्रमुख स्थान"
                 name="playingPosition"
-                value={
-                  form.playingPosition
-                }
-                onChange={
-                  handleChange
-                }
-              >
-
-                <option value="">
-                  निवडा
-                </option>
-
-                <option value="Goalkeeper">
-                  गोलरक्षक (Goalkeeper)
-                </option>
-
-                <option value="Defender">
-                  संरक्षक (Defender)
-                </option>
-
-                <option value="Midfielder">
-                  मध्यरक्षक (Midfielder)
-                </option>
-
-                <option value="Forward">
-                  आक्रमक (Forward)
-                </option>
-
-                <option value="All-Rounder">
-                  अष्टपैलू खेळाडू (All-Rounder)
-                </option>
-
-              </select>
-
-            </div>
-
-          </div>
-
-          <div className="form-row">
-
-            <div className="form-group">
-
-              <label>
-                Practice Club मध्ये
-                प्रवेश केलेले वर्ष
-              </label>
-
-              <input
-                type="number"
-                name="practiceClubFromYear"
-                value={
-                  form.practiceClubFromYear
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="उदा. 2014"
-                min="1900"
-                max="2100"
+                value={form.playingPosition}
+                onChange={handleChange}
+                options={[
+                  ["", "निवडा"],
+                  [
+                    "Goalkeeper",
+                    "गोलरक्षक (Goalkeeper)",
+                  ],
+                  [
+                    "Defender",
+                    "संरक्षक (Defender)",
+                  ],
+                  [
+                    "Midfielder",
+                    "मध्यरक्षक (Midfielder)",
+                  ],
+                  [
+                    "Forward",
+                    "आक्रमक (Forward)",
+                  ],
+                  [
+                    "All-Rounder",
+                    "अष्टपैलू खेळाडू (All-Rounder)",
+                  ],
+                ]}
               />
 
-            </div>
+              <YearSelectField
+                label="Practice Club मध्ये प्रवेश केलेले वर्ष"
+                name="practiceClubFromYear"
+                value={form.practiceClubFromYear}
+                onChange={handleChange}
+              />
 
-            <div className="form-group">
-
-              <label>
-                Practice Club मधील
-                खेळाचा शेवटचा वर्ष
-              </label>
-
-              <input
-                type="number"
+              <YearSelectField
+                label="Practice Club मधील खेळाचा शेवटचा वर्ष"
                 name="practiceClubToYear"
-                value={
-                  form.practiceClubToYear
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="उदा. 2022"
-                min="1900"
-                max="2100"
+                value={form.practiceClubToYear}
+                onChange={handleChange}
                 disabled={
                   form.currentlyPlayingAtPracticeClub
                 }
@@ -814,153 +800,136 @@ const handleSubmit = async (e) => {
 
             </div>
 
-          </div>
+            {/* CURRENT PLAYER */}
 
-          <div className="checkbox-group">
+            <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
 
-            <input
-              type="checkbox"
-              id="currentlyPlaying"
-              name="currentlyPlayingAtPracticeClub"
-              checked={
-                form.currentlyPlayingAtPracticeClub
-              }
-              onChange={
-                handleChange
-              }
-            />
+              <label className="flex items-center gap-3 cursor-pointer">
 
-            <label htmlFor="currentlyPlaying">
-              सध्या Practice Club मध्ये
-              खेळत आहे
-            </label>
+                <input
+                  type="checkbox"
+                  id="currentlyPlaying"
+                  name="currentlyPlayingAtPracticeClub"
+                  checked={
+                    form.currentlyPlayingAtPracticeClub
+                  }
+                  onChange={handleChange}
+                  className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
 
-          </div>
+                <div>
 
-        </div>
+                  <span className="block text-sm font-bold text-[#09251b]">
+                    सध्या Practice Club मध्ये खेळत आहे
+                  </span>
 
-        {/* ================================= */}
-        {/* COMPETITIONS */}
-        {/* ================================= */}
+                  <span className="block mt-0.5 text-xs text-slate-500">
+                    Player सध्या Club मध्ये active असल्यास निवडा.
+                  </span>
 
-        <div className="form-section">
+                </div>
 
-          <div className="section-header">
-
-            <div>
-
-              <h2>
-                आठवणीतील उल्लेखनीय
-                स्पर्धा
-              </h2>
-
-              <p>
-                आवश्यक तितक्या स्पर्धा
-                add करू शकता
-              </p>
+              </label>
 
             </div>
 
-          </div>
+          </FormSection>
 
-          <div className="add-item-row">
+          {/* ===================================================
+              COMPETITIONS
+          =================================================== */}
 
-            <input
-              type="text"
-              value={competition}
-              onChange={(e) =>
-                setCompetition(
-                  e.target.value
-                )
-              }
-              placeholder="स्पर्धेचे नाव"
-            />
+          <FormSection
+            number="04"
+            title="आठवणीतील उल्लेखनीय स्पर्धा"
+            subtitle="आवश्यक तितक्या स्पर्धा add करू शकता"
+          >
 
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={
-                addCompetition
-              }
-            >
-              + स्पर्धा जोडा
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
 
-          </div>
+              <input
+                type="text"
+                value={competition}
+                onChange={(e) =>
+                  setCompetition(e.target.value)
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addCompetition();
+                  }
+                }}
+                placeholder="स्पर्धेचे नाव"
+                className="flex-1 h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+              />
 
-          {form.memorableCompetitions
-            .length > 0 && (
+              <button
+                type="button"
+                onClick={addCompetition}
+                className="h-12 px-6 rounded-xl bg-[#063b2b] text-white text-sm font-bold hover:bg-emerald-700 transition"
+              >
+                + स्पर्धा जोडा
+              </button>
 
-            <div className="items-list">
+            </div>
 
-              {form.memorableCompetitions.map(
-                (item, index) => (
+            {form.memorableCompetitions.length > 0 && (
 
-                  <div
-                    className="item-row"
-                    key={index}
-                  >
+              <div className="mt-4 space-y-2">
 
-                    <span>
-                      {item}
-                    </span>
+                {form.memorableCompetitions.map(
+                  (item, index) => (
 
-                    <button
-                      type="button"
-                      className="delete-btn"
-                      onClick={() =>
-                        removeCompetition(
-                          index
-                        )
-                      }
+                    <div
+                      key={`${item}-${index}`}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
                     >
-                      ×
-                    </button>
 
-                  </div>
+                      <div className="flex items-center gap-3">
 
-                )
-              )}
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-black text-emerald-700">
+                          {index + 1}
+                        </span>
 
-            </div>
+                        <span className="text-sm font-semibold text-slate-700">
+                          {item}
+                        </span>
 
-          )}
+                      </div>
 
-        </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeCompetition(index)
+                        }
+                        className="h-8 w-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition"
+                      >
+                        ×
+                      </button>
 
-        {/* ================================= */}
-        {/* RELATIVES */}
-        {/* ================================= */}
+                    </div>
 
-        <div className="form-section">
+                  )
+                )}
 
-          <div className="section-header">
+              </div>
 
-            <div>
+            )}
 
-              <h2>
-                Practice Club मधील
-                नातेवाईक
-              </h2>
+          </FormSection>
 
-              <p>
-                सध्या Practice Club मध्ये
-                खेळणारे नातेवाईक
-              </p>
+          {/* ===================================================
+              RELATIVES
+          =================================================== */}
 
-            </div>
+          <FormSection
+            number="05"
+            title="Practice Club मधील नातेवाईक"
+            subtitle="सध्या Practice Club मध्ये खेळणारे नातेवाईक"
+          >
 
-          </div>
-
-          <div className="form-group">
-
-            <label>
-              आपले कोणते नातेवाईक
-              सध्या Practice Club मध्ये
-              खेळत आहेत का?
-            </label>
-
-            <select
+            <SelectField
+              label="आपले कोणते नातेवाईक सध्या Practice Club मध्ये खेळत आहेत का?"
               name="hasRelativesInPracticeClub"
               value={
                 form.hasRelativesInPracticeClub
@@ -970,8 +939,7 @@ const handleSubmit = async (e) => {
               onChange={(e) => {
 
                 const hasRelative =
-                  e.target.value ===
-                  "yes";
+                  e.target.value === "yes";
 
                 setForm((prev) => ({
                   ...prev,
@@ -986,168 +954,387 @@ const handleSubmit = async (e) => {
                 }));
 
               }}
-            >
+              options={[
+                ["no", "नाही"],
+                ["yes", "होय"],
+              ]}
+            />
 
-              <option value="no">
-                नाही
-              </option>
+            {form.hasRelativesInPracticeClub && (
 
-              <option value="yes">
-                होय
-              </option>
+              <div className="mt-5">
 
-            </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          </div>
-
-          {form.hasRelativesInPracticeClub && (
-
-            <>
-
-              <div className="form-row">
-
-                <div className="form-group">
-
-                  <label>
-                    नातेवाईकाचे नाव
-                  </label>
-
-                  <input
-                    type="text"
+                  <InputField
+                    label="नातेवाईकाचे नाव"
                     name="name"
-                    value={
-                      relative.name
-                    }
-                    onChange={
-                      handleRelativeChange
-                    }
+                    value={relative.name}
+                    onChange={handleRelativeChange}
                     placeholder="नाव"
                   />
 
-                </div>
-
-                <div className="form-group">
-
-                  <label>
-                    नाते
-                  </label>
-
-                  <input
-                    type="text"
+                  <InputField
+                    label="नाते"
                     name="relation"
-                    value={
-                      relative.relation
-                    }
-                    onChange={
-                      handleRelativeChange
-                    }
+                    value={relative.relation}
+                    onChange={handleRelativeChange}
                     placeholder="उदा. भाऊ"
                   />
 
                 </div>
 
+                <button
+                  type="button"
+                  onClick={addRelative}
+                  className="mt-4 h-12 px-6 rounded-xl bg-[#063b2b] text-white text-sm font-bold hover:bg-emerald-700 transition"
+                >
+                  + नातेवाईक जोडा
+                </button>
+
+                {form.relativesInPracticeClub.length > 0 && (
+
+                  <div className="mt-4 space-y-2">
+
+                    {form.relativesInPracticeClub.map(
+                      (item, index) => (
+
+                        <div
+                          key={`${item.name}-${index}`}
+                          className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                        >
+
+                          <div>
+
+                            <p className="text-sm font-bold text-slate-800">
+                              {item.name}
+                            </p>
+
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              {item.relation}
+                            </p>
+
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeRelative(index)
+                            }
+                            className="h-8 w-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition"
+                          >
+                            ×
+                          </button>
+
+                        </div>
+
+                      )
+                    )}
+
+                  </div>
+
+                )}
+
               </div>
 
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={
-                  addRelative
-                }
-              >
-                + नातेवाईक जोडा
-              </button>
+            )}
 
-              {form.relativesInPracticeClub
-                .length > 0 && (
+          </FormSection>
 
-                <div className="items-list">
+          {/* ===================================================
+              MESSAGE
+          =================================================== */}
 
-                  {form.relativesInPracticeClub.map(
-                    (
-                      item,
-                      index
-                    ) => (
+          {message && (
 
-                      <div
-                        className="item-row"
-                        key={index}
-                      >
-
-                        <span>
-                          <strong>
-                            {item.name}
-                          </strong>
-
-                          {" - "}
-
-                          {item.relation}
-                        </span>
-
-                        <button
-                          type="button"
-                          className="delete-btn"
-                          onClick={() =>
-                            removeRelative(
-                              index
-                            )
-                          }
-                        >
-                          ×
-                        </button>
-
-                      </div>
-
-                    )
-                  )}
-
-                </div>
-
-              )}
-
-            </>
+            <div
+              className={
+                message.startsWith("✓")
+                  ? "rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+                  : "rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600"
+              }
+            >
+              {message}
+            </div>
 
           )}
 
-        </div>
+          {/* ===================================================
+              ACTIONS
+          =================================================== */}
 
-        {/* ================================= */}
-        {/* MESSAGE */}
-        {/* ================================= */}
+          <div className="sticky bottom-3 z-20">
 
-        {message && (
+            <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md p-3 shadow-[0_15px_50px_rgba(15,23,42,0.10)]">
 
-          <div
-            className={
-              message.startsWith("✓")
-                ? "success-message"
-                : "error-message"
-            }
-          >
-            {message}
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+
+                {onCancel && (
+
+                  <button
+                    type="button"
+                    onClick={onCancel}
+                    disabled={loading}
+                    className="h-12 px-6 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group h-12 px-8 rounded-xl bg-[#063b2b] text-white text-sm font-black transition hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-900/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+
+                  <span className="flex items-center justify-center gap-3">
+
+                    {loading ? (
+
+                      <>
+
+                        <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+
+                        {player
+                          ? "Update होत आहे..."
+                          : "Save होत आहे..."}
+
+                      </>
+
+                    ) : (
+
+                      <>
+
+                        {player
+                          ? "Player Update करा"
+                          : "Player माहिती Save करा"}
+
+                        <span className="text-lg transition-transform group-hover:translate-x-1">
+                          →
+                        </span>
+
+                      </>
+
+                    )}
+
+                  </span>
+
+                </button>
+
+              </div>
+
+            </div>
+
           </div>
 
-        )}
+        </form>
 
-        {/* ================================= */}
-        {/* SUBMIT */}
-        {/* ================================= */}
+      </div>
+    </div>
+  );
+}
 
-        <div className="form-actions">
+// =========================================================
+// FORM SECTION
+// =========================================================
 
-          <button
-            type="submit"
-            className="primary-btn"
-            disabled={loading}
-          >
-            {loading
-              ? "माहिती Save होत आहे..."
-              : "Player माहिती Save करा"}
-          </button>
+function FormSection({
+  number,
+  title,
+  subtitle,
+  children,
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-600" />
+
+      <div className="p-5 sm:p-7">
+
+        <div className="flex items-start gap-4 mb-6">
+
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[10px] font-black text-emerald-700">
+            {number}
+          </div>
+
+          <div>
+
+            <h2 className="text-lg sm:text-xl font-black tracking-tight text-[#09251b]">
+              {title}
+            </h2>
+
+            <p className="mt-1 text-xs sm:text-sm text-slate-400">
+              {subtitle}
+            </p>
+
+          </div>
 
         </div>
 
-      </form>
+        {children}
+
+      </div>
+
+    </section>
+  );
+}
+
+// =========================================================
+// INPUT FIELD
+// =========================================================
+
+function InputField({
+  label,
+  type = "text",
+  name,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  maxLength,
+  min,
+  max,
+  disabled = false,
+  inputMode,
+}) {
+  return (
+    <div>
+
+      <label className="block mb-2 text-xs font-bold text-slate-600">
+        {label}
+      </label>
+
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        maxLength={maxLength}
+        min={min}
+        max={max}
+        disabled={disabled}
+        inputMode={inputMode}
+        className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+      />
+
+    </div>
+  );
+}
+
+// =========================================================
+// SELECT FIELD
+// =========================================================
+
+function SelectField({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  disabled = false,
+}) {
+  return (
+    <div>
+
+      <label className="block mb-2 text-xs font-bold text-slate-600">
+        {label}
+      </label>
+
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+      >
+
+        {options.map(
+          ([optionValue, optionLabel]) => (
+
+            <option
+              key={optionValue}
+              value={optionValue}
+            >
+              {optionLabel}
+            </option>
+
+          )
+        )}
+
+      </select>
+
+    </div>
+  );
+}
+
+// =========================================================
+// YEAR SELECT FIELD
+// =========================================================
+
+function YearSelectField({
+  label,
+  name,
+  value,
+  onChange,
+  disabled = false,
+}) {
+  const currentYear =
+    new Date().getFullYear();
+
+  const startYear = 1950;
+
+  const years = [];
+
+  for (
+    let year = currentYear;
+    year >= startYear;
+    year--
+  ) {
+    years.push(year);
+  }
+
+  return (
+    <div>
+
+      <label className="block mb-2 text-xs font-bold text-slate-600">
+        {label}
+      </label>
+
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+      >
+
+        <option value="">
+          वर्ष निवडा
+        </option>
+
+        {years.map((year) => (
+
+          <option
+            key={year}
+            value={year}
+          >
+            {year}
+          </option>
+
+        ))}
+
+      </select>
+
+      {disabled && (
+
+        <p className="mt-1 text-[11px] text-emerald-600">
+          सध्या Club मध्ये खेळत असल्यामुळे शेवटचे वर्ष लागू नाही.
+        </p>
+
+      )}
 
     </div>
   );

@@ -133,88 +133,87 @@ function ManagementDashboard({ user, onLogout }) {
       setDetailsLoading(false);
     }
   };
-const handleDeletePlayer = async (playerId) => {
-  const confirmed = window.confirm(
-    "हा Player कायमचा delete करायचा आहे का?"
-  );
 
-  if (!confirmed) {
-    return;
-  }
+  // ==========================================
+  // DELETE PLAYER
+  // ==========================================
 
-  try {
-    setError("");
+  const handleDeletePlayer = async (playerId) => {
+    const confirmed = window.confirm(
+      "हा Player कायमचा delete करायचा आहे का?"
+    );
 
-    const token =
-      localStorage.getItem("token");
-
-    if (!token) {
-      setError(
-        "Login session सापडले नाही. कृपया पुन्हा Login करा."
-      );
+    if (!confirmed) {
       return;
     }
 
-    const response = await fetch(
-      `http://localhost:5000/api/players/${playerId}`,
-      {
-        method: "DELETE",
+    try {
+      setError("");
 
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        setError(
+          "Login session सापडले नाही. कृपया पुन्हा Login करा."
+        );
+        return;
       }
-    );
 
-    const data =
-      await response.json();
+      const response = await fetch(
+        `http://localhost:5000/api/players/${playerId}`,
+        {
+          method: "DELETE",
 
-    if (!response.ok) {
-      throw new Error(
-        data.message ||
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Player delete करताना error आला."
+        );
+      }
+
+      setPlayers((prevPlayers) =>
+        prevPlayers.filter(
+          (player) =>
+            player._id !== playerId
+        )
+      );
+
+      if (
+        selectedPlayer?._id === playerId
+      ) {
+        setSelectedPlayer(null);
+      }
+
+      setError("");
+
+      alert(
+        "Player यशस्वीपणे delete झाला."
+      );
+
+    } catch (error) {
+      console.error(
+        "Delete player error:",
+        error
+      );
+
+      setError(
+        error.message ||
           "Player delete करताना error आला."
       );
     }
+  };
 
-    console.log(
-      "Player deleted:",
-      data
-    );
-
-    // Remove deleted player from list
-    setPlayers((prevPlayers) =>
-      prevPlayers.filter(
-        (player) =>
-          player._id !== playerId
-      )
-    );
-
-    // Close details if deleted player
-    if (
-      selectedPlayer?._id === playerId
-    ) {
-      setSelectedPlayer(null);
-    }
-
-    setError("");
-
-    alert(
-      "Player यशस्वीपणे delete झाला."
-    );
-
-  } catch (error) {
-    console.error(
-      "Delete player error:",
-      error
-    );
-
-    setError(
-      error.message ||
-        "Player delete करताना error आला."
-    );
-  }
-};
   // ==========================================
   // FORMAT DATE
   // ==========================================
@@ -247,66 +246,124 @@ const handleDeletePlayer = async (playerId) => {
 
   if (editingPlayer) {
     return (
-      <div className="management-dashboard">
+      <div className="min-h-screen bg-[#f5f8f6] text-slate-900">
 
-        {/* Header */}
+        {/* Background */}
 
-        <div className="dashboard-header">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
 
-          <div>
-            <h1>
-              Edit Player
-            </h1>
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-emerald-100/50 blur-3xl" />
 
-            <p>
-              {editingPlayer.fullName}
-            </p>
-          </div>
-
-          <button
-            onClick={onLogout}
-            className="logout-btn"
-          >
-            Logout
-          </button>
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-green-100/50 blur-3xl" />
 
         </div>
 
-        {/* Player Form */}
+        <div className="relative z-10">
 
-        <PlayerForm
-          player={editingPlayer}
+          {/* Header */}
 
-          onSave={(updatedPlayer) => {
-            console.log(
-              "Updated player:",
-              updatedPlayer
-            );
+          <header className="bg-white/90 backdrop-blur-md border-b border-slate-200">
 
-            // Update player in list
-            setPlayers((prevPlayers) =>
-              prevPlayers.map((player) =>
-                player._id ===
-                updatedPlayer._id
-                  ? updatedPlayer
-                  : player
-              )
-            );
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
 
-            // Update selected player
-            setSelectedPlayer(
-              updatedPlayer
-            );
+              <div className="flex items-center gap-3">
 
-            // Close edit mode
-            setEditingPlayer(null);
-          }}
+                <div className="w-11 h-11 rounded-xl bg-[#063b2b] flex items-center justify-center shadow-lg">
 
-          onCancel={() => {
-            setEditingPlayer(null);
-          }}
-        />
+                  <span className="text-sm font-black text-white">
+                    FC
+                  </span>
 
+                </div>
+
+                <div>
+
+                  <p className="text-sm font-black text-slate-900">
+                    PRACTICE FC
+                  </p>
+
+                  <p className="text-[9px] uppercase tracking-[0.25em] text-slate-400">
+                    Alumni Management
+                  </p>
+
+                </div>
+
+              </div>
+
+              <button
+                onClick={onLogout}
+                className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:border-red-200 hover:text-red-600 transition"
+              >
+                Logout
+              </button>
+
+            </div>
+
+          </header>
+
+          {/* Edit content */}
+
+          <main className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+
+            <div className="mb-7">
+
+              <div className="flex items-center gap-2 mb-2">
+
+                <span className="w-7 h-[2px] bg-emerald-500" />
+
+                <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-emerald-600">
+                  Player Management
+                </span>
+
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#09251b]">
+                Edit Player
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {editingPlayer.fullName}
+              </p>
+
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_15px_50px_rgba(15,23,42,0.07)] p-4 sm:p-7">
+
+              <PlayerForm
+                player={editingPlayer}
+
+                onSave={(updatedPlayer) => {
+                  console.log(
+                    "Updated player:",
+                    updatedPlayer
+                  );
+
+                  setPlayers((prevPlayers) =>
+                    prevPlayers.map((player) =>
+                      player._id ===
+                      updatedPlayer._id
+                        ? updatedPlayer
+                        : player
+                    )
+                  );
+
+                  setSelectedPlayer(
+                    updatedPlayer
+                  );
+
+                  setEditingPlayer(null);
+                }}
+
+                onCancel={() => {
+                  setEditingPlayer(null);
+                }}
+              />
+
+            </div>
+
+          </main>
+
+        </div>
       </div>
     );
   }
@@ -317,323 +374,416 @@ const handleDeletePlayer = async (playerId) => {
 
   if (selectedPlayer) {
     return (
-      <div className="management-dashboard">
+      <div className="min-h-screen bg-[#f5f8f6] text-slate-900">
 
-        {/* Header */}
+        {/* Background */}
 
-        <div className="dashboard-header">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
 
-          <div>
-            <h1>
-              Player Details
-            </h1>
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-emerald-100/50 blur-3xl" />
 
-            <p>
-              {selectedPlayer.fullName}
-            </p>
-          </div>
-
-          <button
-            onClick={onLogout}
-            className="logout-btn"
-          >
-            Logout
-          </button>
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-green-100/50 blur-3xl" />
 
         </div>
 
-        {/* Player Details */}
+        <div className="relative z-10">
 
-        <div className="player-details">
+          {/* Header */}
 
-          {/* Photo */}
+          <header className="bg-white/90 backdrop-blur-md border-b border-slate-200">
 
-          <div className="details-photo-section">
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
 
-            {selectedPlayer.photo ? (
-              <img
-                src={selectedPlayer.photo}
-                alt={
-                  selectedPlayer.fullName
-                }
-                className="player-detail-photo"
-              />
-            ) : (
-              <div className="no-photo">
-                ⚽
+              <div className="flex items-center gap-3">
+
+                <div className="w-11 h-11 rounded-xl bg-[#063b2b] flex items-center justify-center shadow-lg">
+
+                  <span className="text-sm font-black text-white">
+                    FC
+                  </span>
+
+                </div>
+
+                <div>
+
+                  <p className="text-sm font-black text-slate-900">
+                    PRACTICE FC
+                  </p>
+
+                  <p className="text-[9px] uppercase tracking-[0.25em] text-slate-400">
+                    Alumni Management
+                  </p>
+
+                </div>
+
               </div>
-            )}
 
-          </div>
+              <button
+                onClick={onLogout}
+                className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:border-red-200 hover:text-red-600 transition"
+              >
+                Logout
+              </button>
 
-          {/* Personal Information */}
+            </div>
 
-          <div className="details-section">
+          </header>
 
-            <h2>
-              वैयक्तिक माहिती
-            </h2>
+          {/* Details */}
 
-            <div className="details-grid">
+          <main className="max-w-7xl mx-auto px-5 sm:px-8 py-7">
 
-              <Detail
-                label="पूर्ण नाव"
-                value={
-                  selectedPlayer.fullName
-                }
-              />
+            {/* Page heading */}
 
-              <Detail
-                label="टोपण नाव"
-                value={
-                  selectedPlayer.nickname
-                }
-              />
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
 
-              <Detail
-                label="जन्मतारीख"
-                value={formatDate(
-                  selectedPlayer.birthDate
+              <div>
+
+                <div className="flex items-center gap-2 mb-2">
+
+                  <span className="w-7 h-[2px] bg-emerald-500" />
+
+                  <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-emerald-600">
+                    Alumni Profile
+                  </span>
+
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#09251b]">
+                  Player Details
+                </h1>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  {selectedPlayer.fullName}
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* Profile card */}
+
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_15px_50px_rgba(15,23,42,0.07)] overflow-hidden">
+
+              {/* Top profile */}
+
+              <div className="p-6 sm:p-8 bg-gradient-to-r from-[#063b2b] to-[#0b6046] text-white">
+
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-white/10 border border-white/20 overflow-hidden flex items-center justify-center shrink-0">
+
+                    {selectedPlayer.photo ? (
+
+                      <img
+                        src={selectedPlayer.photo}
+                        alt={
+                          selectedPlayer.fullName
+                        }
+                        className="w-full h-full object-cover"
+                      />
+
+                    ) : (
+
+                      <span className="text-4xl">
+                        ⚽
+                      </span>
+
+                    )}
+
+                  </div>
+
+                  <div className="text-center sm:text-left pt-2">
+
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-emerald-200 font-bold">
+                      Practice Football Club
+                    </p>
+
+                    <h2 className="mt-2 text-2xl sm:text-3xl font-black">
+                      {selectedPlayer.fullName}
+                    </h2>
+
+                    {selectedPlayer.nickname && (
+                      <p className="mt-1 text-sm text-emerald-100">
+                        "{selectedPlayer.nickname}"
+                      </p>
+                    )}
+
+                    <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-2">
+
+                      {selectedPlayer.playingPosition && (
+
+                        <span className="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-[10px] font-bold uppercase tracking-wider">
+                          {selectedPlayer.playingPosition}
+                        </span>
+
+                      )}
+
+                      {selectedPlayer.practiceClubFromYear && (
+
+                        <span className="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-[10px] font-bold uppercase tracking-wider">
+                          Since {selectedPlayer.practiceClubFromYear}
+                        </span>
+
+                      )}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* Personal Information */}
+
+              <div className="p-6 sm:p-8 border-b border-slate-100">
+
+                <SectionTitle title="वैयक्तिक माहिती" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-5">
+
+                  <Detail
+                    label="पूर्ण नाव"
+                    value={
+                      selectedPlayer.fullName
+                    }
+                  />
+
+                  <Detail
+                    label="टोपण नाव"
+                    value={
+                      selectedPlayer.nickname
+                    }
+                  />
+
+                  <Detail
+                    label="जन्मतारीख"
+                    value={formatDate(
+                      selectedPlayer.birthDate
+                    )}
+                  />
+
+                  <Detail
+                    label="contact Number"
+                    value={
+                      selectedPlayer.contactNumber
+                    }
+                  />
+
+                  <Detail
+                    label="Alternate Contact Number"
+                    value={
+                      selectedPlayer.alternateContactNumber
+                    }
+                  />
+
+                  <Detail
+                    label="आहार प्रकार"
+                    value={
+                      selectedPlayer.foodPreference
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+              {/* Football Information */}
+
+              <div className="p-6 sm:p-8 border-b border-slate-100">
+
+                <SectionTitle title="Football माहिती" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-5">
+
+                  <Detail
+                    label="Football सुरू केलेले वर्ष"
+                    value={
+                      selectedPlayer.footballStartedYear
+                    }
+                  />
+
+                  <Detail
+                    label="Practice Club प्रवेश वर्ष"
+                    value={
+                      selectedPlayer.practiceClubFromYear
+                    }
+                  />
+
+                  <Detail
+                    label="Practice Club मधील शेवटचे वर्ष"
+                    value={
+                      selectedPlayer.practiceClubToYear
+                    }
+                  />
+
+                  <Detail
+                    label="सध्या Practice Club मध्ये"
+                    value={
+                      selectedPlayer.currentlyPlayingAtPracticeClub
+                        ? "होय"
+                        : "नाही"
+                    }
+                  />
+
+                  <Detail
+                    label="खेळातील प्रमुख स्थान"
+                    value={
+                      selectedPlayer.playingPosition
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+              {/* Competitions */}
+
+              <div className="p-6 sm:p-8 border-b border-slate-100">
+
+                <SectionTitle title="आठवणीतील उल्लेखनीय स्पर्धा" />
+
+                {selectedPlayer
+                  .memorableCompetitions
+                  ?.length > 0 ? (
+
+                  <div className="mt-5 space-y-2">
+
+                    {selectedPlayer.memorableCompetitions.map(
+                      (
+                        competition,
+                        index
+                      ) => (
+
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100"
+                        >
+
+                          <span className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">
+                            {index + 1}
+                          </span>
+
+                          <span className="text-sm font-medium text-slate-700">
+                            {competition}
+                          </span>
+
+                        </div>
+
+                      )
+                    )}
+
+                  </div>
+
+                ) : (
+
+                  <p className="mt-4 text-sm text-slate-400">
+                    कोणतीही माहिती नाही.
+                  </p>
+
                 )}
-              />
 
-              <Detail
-                label="WhatsApp Number"
-                value={
-                  selectedPlayer.whatsappNumber
-                }
-              />
+              </div>
 
-              <Detail
-                label="Alternate Contact Number"
-                value={
-                  selectedPlayer.alternateContactNumber
-                }
-              />
+              {/* Relatives */}
 
-              <Detail
-                label="आहार प्रकार"
-                value={
-                  selectedPlayer.foodPreference
-                }
-              />
+              <div className="p-6 sm:p-8">
 
-            </div>
+                <SectionTitle title="Practice Club मधील नातेवाईक" />
 
-          </div>
+                <div className="mt-5">
 
-          {/* Football Information */}
+                  <span
+                    className={`inline-flex px-3 py-1.5 rounded-full text-xs font-bold ${
+                      selectedPlayer.hasRelativesInPracticeClub
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {selectedPlayer.hasRelativesInPracticeClub
+                      ? "होय"
+                      : "नाही"}
+                  </span>
 
-          <div className="details-section">
+                </div>
 
-            <h2>
-              Football माहिती
-            </h2>
+                {selectedPlayer
+                  .relativesInPracticeClub
+                  ?.length > 0 && (
 
-            <div className="details-grid">
+                  <div className="mt-4 space-y-2">
 
-              <Detail
-                label="Football सुरू केलेले वर्ष"
-                value={
-                  selectedPlayer.footballStartedYear
-                }
-              />
+                    {selectedPlayer.relativesInPracticeClub.map(
+                      (
+                        relative,
+                        index
+                      ) => (
 
-              <Detail
-                label="Practice Club प्रवेश वर्ष"
-                value={
-                  selectedPlayer.practiceClubFromYear
-                }
-              />
+                        <div
+                          key={index}
+                          className="p-4 rounded-xl bg-slate-50 border border-slate-100"
+                        >
 
-              <Detail
-                label="Practice Club मधील शेवटचे वर्ष"
-                value={
-                  selectedPlayer.practiceClubToYear
-                }
-              />
+                          <p className="font-bold text-slate-800">
+                            {relative.name}
+                          </p>
 
-              <Detail
-                label="सध्या Practice Club मध्ये"
-                value={
-                  selectedPlayer.currentlyPlayingAtPracticeClub
-                    ? "होय"
-                    : "नाही"
-                }
-              />
+                          <p className="text-xs text-slate-400 mt-1">
+                            {relative.relation}
+                          </p>
 
-              <Detail
-                label="खेळातील प्रमुख स्थान"
-                value={
-                  selectedPlayer.playingPosition
-                }
-              />
+                        </div>
+
+                      )
+                    )}
+
+                  </div>
+
+                )}
+
+              </div>
 
             </div>
 
-          </div>
+            {/* Actions */}
 
-          {/* Competitions */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
 
-          <div className="details-section">
-
-            <h2>
-              आठवणीतील उल्लेखनीय स्पर्धा
-            </h2>
-
-            {selectedPlayer
-              .memorableCompetitions
-              ?.length > 0 ? (
-
-              <ul>
-                {selectedPlayer.memorableCompetitions.map(
-                  (
-                    competition,
-                    index
-                  ) => (
-                    <li key={index}>
-                      {competition}
-                    </li>
+              <button
+                onClick={() =>
+                  setEditingPlayer(
+                    selectedPlayer
                   )
-                )}
-              </ul>
+                }
+                className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-[#063b2b] text-white text-sm font-bold hover:bg-emerald-800 transition shadow-lg shadow-emerald-900/10"
+              >
+                ✏️ Edit Player
+              </button>
 
-            ) : (
-              <p>
-                कोणतीही माहिती नाही.
-              </p>
-            )}
-
-          </div>
-
-          {/* Relatives */}
-
-          <div className="details-section">
-
-            <h2>
-              Practice Club मधील नातेवाईक
-            </h2>
-
-            <p>
-              {selectedPlayer
-                .hasRelativesInPracticeClub
-                ? "होय"
-                : "नाही"}
-            </p>
-
-            {selectedPlayer
-              .relativesInPracticeClub
-              ?.length > 0 && (
-
-              <ul>
-
-                {selectedPlayer.relativesInPracticeClub.map(
-                  (
-                    relative,
-                    index
-                  ) => (
-
-                    <li key={index}>
-
-                      <strong>
-                        {relative.name}
-                      </strong>
-
-                      {" - "}
-
-                      {relative.relation}
-
-                    </li>
-
+              <button
+                onClick={() =>
+                  handleDeletePlayer(
+                    selectedPlayer._id
                   )
-                )}
-
-              </ul>
-
-            )}
-
-          </div>
-
-          {/* Record Information */}
-
-          <div className="details-section">
-
-            <h2>
-              Record Information
-            </h2>
-
-            <div className="details-grid">
-
-              <Detail
-                label="Created By"
-                value={
-                  selectedPlayer
-                    .createdBy
-                    ?.name || "-"
                 }
-              />
+                className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-white border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition"
+              >
+                🗑️ Delete Player
+              </button>
 
-              <Detail
-                label="Username"
-                value={
-                  selectedPlayer
-                    .createdBy
-                    ?.username || "-"
-                }
-              />
-
-              <Detail
-                label="Created At"
-                value={formatDate(
-                  selectedPlayer.createdAt
-                )}
-              />
+              <button
+                onClick={closeDetails}
+                className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition"
+              >
+                ← Back to Players
+              </button>
 
             </div>
 
-          </div>
+          </main>
 
         </div>
-
-        {/* Actions */}
-
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            marginTop: "20px",
-          }}
-        >
-
-          <button
-            onClick={() =>
-              setEditingPlayer(
-                selectedPlayer
-              )
-            }
-            className="edit-btn"
-          >
-            ✏️ Edit Player
-          </button>
-<button
-  onClick={() =>
-    handleDeletePlayer(
-      selectedPlayer._id
-    )
-  }
-  className="delete-btn"
->
-  🗑️ Delete Player
-</button>
-          <button
-            onClick={closeDetails}
-            className="back-btn"
-          >
-            ← Back to Players
-          </button>
-
-        </div>
-
       </div>
     );
   }
@@ -643,211 +793,486 @@ const handleDeletePlayer = async (playerId) => {
   // ==========================================
 
   return (
-    <div className="management-dashboard">
+    <div className="min-h-screen bg-[#f5f8f6] text-slate-900">
 
-      {/* Header */}
+      {/* Background */}
 
-      <div className="dashboard-header">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
 
-        <div>
+        <div className="absolute -top-40 -left-40 w-[550px] h-[550px] rounded-full bg-emerald-100/50 blur-3xl" />
 
-          <h1>
-            Management Dashboard
-          </h1>
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-green-100/50 blur-3xl" />
 
-          <p>
-            Welcome, {user.name}
-          </p>
-
-        </div>
-
-        <button
-          onClick={onLogout}
-          className="logout-btn"
-        >
-          Logout
-        </button>
+        <div
+          className="absolute inset-0 opacity-[0.018]"
+          style={{
+            backgroundImage:
+              "linear-gradient(#064e3b 1px, transparent 1px), linear-gradient(90deg, #064e3b 1px, transparent 1px)",
+            backgroundSize: "70px 70px",
+          }}
+        />
 
       </div>
 
-      {/* Summary */}
+      <div className="relative z-10">
 
-      <div className="dashboard-summary">
+        {/* ======================================
+            HEADER
+        ====================================== */}
 
-        <div className="summary-card">
+        <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
 
-          <h3>
-            Total Players
-          </h3>
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
 
-          <strong>
-            {players.length}
-          </strong>
+            <div className="flex items-center gap-3">
 
-        </div>
+              {/* Logo placeholder */}
 
-      </div>
+              <div className="w-11 h-11 rounded-xl bg-[#063b2b] flex items-center justify-center shadow-lg shadow-emerald-900/10">
 
-      {/* Players */}
+                <span className="text-sm font-black text-white">
+                  FC
+                </span>
 
-      <div className="players-section">
+              </div>
 
-        <div className="section-header">
+              <div>
 
-          <div>
+                <p className="text-sm font-black tracking-tight text-slate-900">
+                  PRACTICE FC
+                </p>
 
-            <h2>
-              Players
-            </h2>
+                <p className="text-[9px] uppercase tracking-[0.25em] text-slate-400">
+                  Alumni Management
+                </p>
 
-            <p>
-              नोंद झालेल्या सर्व खेळाडूंची माहिती
-            </p>
+              </div>
 
-          </div>
-
-          <button
-            onClick={fetchPlayers}
-            className="refresh-btn"
-          >
-            Refresh
-          </button>
-
-        </div>
-
-        {/* Loading */}
-
-        {loading && (
-          <p>
-            Players माहिती load होत आहे...
-          </p>
-        )}
-
-        {detailsLoading && (
-          <p>
-            Player माहिती load होत आहे...
-          </p>
-        )}
-
-        {/* Error */}
-
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-
-        {/* Empty */}
-
-        {!loading &&
-          !error &&
-          players.length === 0 && (
-
-            <div className="empty-message">
-              अजून कोणत्याही Player ची माहिती
-              नोंद झालेली नाही.
             </div>
 
-          )}
+            <div className="flex items-center gap-3">
 
-        {/* Table */}
+              <div className="hidden sm:flex items-center gap-2">
 
-        {!loading &&
-          !error &&
-          players.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
 
-            <div className="table-container">
+                <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-slate-400">
+                  Management Portal
+                </span>
 
-              <table>
+              </div>
 
-                <thead>
+              <button
+                onClick={onLogout}
+                className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:border-red-200 hover:text-red-600 transition"
+              >
+                Logout
+              </button>
 
-                  <tr>
+            </div>
 
-                    <th>
-                      No.
-                    </th>
+          </div>
 
-                    <th>
-                      Player Name
-                    </th>
+        </header>
 
-                    <th>
-                      Created By
-                    </th>
+        {/* ======================================
+            MAIN
+        ====================================== */}
 
-                    <th>
-                      Created At
-                    </th>
+        <main className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
 
-                    <th>
-                      Action
-                    </th>
+          {/* Welcome */}
 
-                  </tr>
+          <div className="mb-8">
 
-                </thead>
+            <div className="flex items-center gap-2 mb-3">
 
-                <tbody>
+              <span className="w-8 h-[2px] bg-emerald-500" />
 
-                  {players.map(
-                    (
-                      player,
-                      index
-                    ) => (
+              <span className="text-[10px] uppercase tracking-[0.28em] font-bold text-emerald-600">
+                Club Administration
+              </span>
 
-                      <tr
-                        key={player._id}
-                      >
+            </div>
 
-                        <td>
-                          {index + 1}
-                        </td>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
 
-                        <td>
-                          {player.fullName}
-                        </td>
+              <div>
 
-                        <td>
-                          {player.createdBy?.name ||
-                            "-"}
-                        </td>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-[-0.03em] text-[#09251b]">
+                  Management Dashboard
+                </h1>
 
-                        <td>
-                          {formatDate(
-                            player.createdAt
-                          )}
-                        </td>
+                <p className="mt-2 text-sm text-slate-500">
+                  Welcome,{" "}
+                  <span className="font-bold text-slate-700">
+                    {user.name}
+                  </span>
+                </p>
 
-                        <td>
+              </div>
 
-                          <button
-                            className="view-btn"
-                            onClick={() =>
-                              handleViewPlayer(
-                                player._id
-                              )
-                            }
-                          >
-                            View
-                          </button>
+            </div>
 
-                        </td>
+          </div>
+
+          {/* ======================================
+              SUMMARY
+          ====================================== */}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+
+            <div className="relative overflow-hidden bg-[#063b2b] rounded-2xl p-6 text-white shadow-[0_15px_40px_rgba(6,59,43,0.15)]">
+
+              <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full border border-white/10" />
+
+              <p className="text-[10px] uppercase tracking-[0.22em] text-emerald-200 font-bold">
+                Alumni Players
+              </p>
+
+              <div className="mt-3 flex items-end gap-2">
+
+                <strong className="text-4xl font-black">
+                  {players.length}
+                </strong>
+
+                <span className="text-xs text-emerald-200 mb-1">
+                  Total
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="hidden sm:block bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">
+                Club
+              </p>
+
+              <p className="mt-3 text-xl font-black text-[#09251b]">
+                Practice FC
+              </p>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Football Alumni
+              </p>
+
+            </div>
+
+            <div className="hidden sm:block bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-bold">
+                Status
+              </p>
+
+              <div className="mt-3 flex items-center gap-2">
+
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+
+                <span className="text-xl font-black text-[#09251b]">
+                  Active
+                </span>
+
+              </div>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Management system
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* ======================================
+              PLAYERS SECTION
+          ====================================== */}
+
+          <section className="bg-white rounded-2xl border border-slate-200 shadow-[0_15px_50px_rgba(15,23,42,0.06)] overflow-hidden">
+
+            {/* Section Header */}
+
+            <div className="px-5 sm:px-7 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+              <div>
+
+                <div className="flex items-center gap-2">
+
+                  <h2 className="text-xl font-black text-[#09251b]">
+                    Players
+                  </h2>
+
+                  <span className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                    {players.length}
+                  </span>
+
+                </div>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  नोंद झालेल्या सर्व खेळाडूंची माहिती
+                </p>
+
+              </div>
+
+              <button
+                onClick={fetchPlayers}
+                className="self-start sm:self-auto px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition"
+              >
+                ↻ Refresh
+              </button>
+
+            </div>
+
+            {/* Loading */}
+
+            {loading && (
+
+              <div className="p-12 text-center">
+
+                <div className="w-8 h-8 mx-auto border-2 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
+
+                <p className="mt-4 text-sm text-slate-400">
+                  Players माहिती load होत आहे...
+                </p>
+
+              </div>
+
+            )}
+
+            {/* Details Loading */}
+
+            {detailsLoading && (
+
+              <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-100 text-xs text-emerald-700">
+                Player माहिती load होत आहे...
+              </div>
+
+            )}
+
+            {/* Error */}
+
+            {error && (
+
+              <div className="mx-5 sm:mx-7 mt-5 flex gap-3 items-start rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+
+                <span className="w-5 h-5 shrink-0 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">
+                  !
+                </span>
+
+                <p className="text-xs leading-5 text-red-600">
+                  {error}
+                </p>
+
+              </div>
+
+            )}
+
+            {/* Empty */}
+
+            {!loading &&
+              !error &&
+              players.length === 0 && (
+
+                <div className="p-14 text-center">
+
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center text-2xl">
+                    ⚽
+                  </div>
+
+                  <p className="mt-4 text-sm font-bold text-slate-600">
+                    अजून कोणत्याही Player ची माहिती नोंद झालेली नाही.
+                  </p>
+
+                </div>
+
+              )}
+
+            {/* Table */}
+
+            {!loading &&
+              !error &&
+              players.length > 0 && (
+
+                <div className="overflow-x-auto">
+
+                  <table className="w-full text-left">
+
+                    <thead>
+
+                      <tr className="bg-slate-50/80 border-b border-slate-100">
+
+                        <th className="px-5 sm:px-7 py-4 text-[9px] uppercase tracking-[0.18em] font-black text-slate-400">
+                          No.
+                        </th>
+
+                        <th className="px-5 py-4 text-[9px] uppercase tracking-[0.18em] font-black text-slate-400">
+                          Player Name
+                        </th>
+
+                        <th className="px-5 py-4 text-[9px] uppercase tracking-[0.18em] font-black text-slate-400">
+                          Created By
+                        </th>
+
+                        <th className="px-5 py-4 text-[9px] uppercase tracking-[0.18em] font-black text-slate-400">
+                          Created At
+                        </th>
+
+                        <th className="px-5 sm:px-7 py-4 text-[9px] uppercase tracking-[0.18em] font-black text-slate-400">
+                          Action
+                        </th>
 
                       </tr>
 
-                    )
-                  )}
+                    </thead>
 
-                </tbody>
+                    <tbody className="divide-y divide-slate-100">
 
-              </table>
+                      {players.map(
+                        (
+                          player,
+                          index
+                        ) => (
 
-            </div>
+                          <tr
+                            key={player._id}
+                            className="group hover:bg-emerald-50/40 transition"
+                          >
 
-          )}
+                            <td className="px-5 sm:px-7 py-4">
+
+                              <span className="text-xs font-bold text-slate-400">
+                                {String(
+                                  index + 1
+                                ).padStart(
+                                  2,
+                                  "0"
+                                )}
+                              </span>
+
+                            </td>
+
+                            <td className="px-5 py-4">
+
+                              <div className="flex items-center gap-3">
+
+                                <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xs overflow-hidden">
+
+                                  {player.photo ? (
+
+                                    <img
+                                      src={
+                                        player.photo
+                                      }
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                    />
+
+                                  ) : (
+                                    "⚽"
+                                  )}
+
+                                </div>
+
+                                <div>
+
+                                  <p className="text-sm font-bold text-slate-800">
+                                    {player.fullName}
+                                  </p>
+
+                                  {player.nickname && (
+
+                                    <p className="text-[10px] text-slate-400">
+                                      {player.nickname}
+                                    </p>
+
+                                  )}
+
+                                </div>
+
+                              </div>
+
+                            </td>
+
+                            <td className="px-5 py-4">
+
+                              <span className="text-xs text-slate-500">
+                                {player.createdBy?.name ||
+                                  "-"}
+                              </span>
+
+                            </td>
+
+                            <td className="px-5 py-4">
+
+                              <span className="text-xs text-slate-500">
+                                {formatDate(
+                                  player.createdAt
+                                )}
+                              </span>
+
+                            </td>
+
+                            <td className="px-5 sm:px-7 py-4">
+
+                              <button
+                                className="px-4 py-2 rounded-lg bg-[#063b2b] text-white text-[10px] uppercase tracking-wider font-bold hover:bg-emerald-800 hover:shadow-md transition"
+                                onClick={() =>
+                                  handleViewPlayer(
+                                    player._id
+                                  )
+                                }
+                              >
+                                View
+                              </button>
+
+                            </td>
+
+                          </tr>
+
+                        )
+                      )}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              )}
+
+          </section>
+
+        </main>
+
+        {/* Footer */}
+
+        <footer className="max-w-7xl mx-auto px-5 sm:px-8 py-6">
+
+          <p className="text-center text-[9px] uppercase tracking-[0.25em] text-slate-400">
+            Practice Football Club • Alumni Management System
+          </p>
+
+        </footer>
 
       </div>
+
+    </div>
+  );
+}
+
+// ==========================================
+// SECTION TITLE
+// ==========================================
+
+function SectionTitle({ title }) {
+  return (
+    <div className="flex items-center gap-3">
+
+      <span className="w-1 h-6 rounded-full bg-emerald-600" />
+
+      <h2 className="text-lg font-black text-[#09251b]">
+        {title}
+      </h2>
 
     </div>
   );
@@ -862,13 +1287,13 @@ function Detail({
   value,
 }) {
   return (
-    <div className="detail-item">
+    <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 hover:border-emerald-100 hover:bg-emerald-50/30 transition">
 
-      <span className="detail-label">
+      <span className="block text-[9px] uppercase tracking-[0.15em] font-bold text-slate-400">
         {label}
       </span>
 
-      <strong className="detail-value">
+      <strong className="block mt-2 text-sm font-bold text-slate-800 break-words">
         {value || "-"}
       </strong>
 

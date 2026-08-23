@@ -184,8 +184,8 @@ function AnchorDashboard({ user, onLogout }) {
                 )}
               />
               <Detail
-                label="WhatsApp Number"
-                value={selectedPlayer.whatsappNumber}
+                label="contact Number"
+                value={selectedPlayer.contactNumber}
               />
               <Detail
                 label="Alternate Contact"

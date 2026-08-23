@@ -49,7 +49,7 @@ const playerSchema = new mongoose.Schema(
     // Contact Information
     // -----------------------------
 
-    whatsappNumber: {
+    contactNumber: {
       type: String,
       trim: true,
       default: "",
