@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ExcelJS from "exceljs";
 import PlayerForm from "../DataEntry/PlayerForm";
 import API_URL from "../../api";
-
+import logo from "./../../assets/logo.png";
 function ManagementDashboard({ user, onLogout }) {
   const [players, setPlayers] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -13,7 +13,7 @@ function ManagementDashboard({ user, onLogout }) {
   const [error, setError] = useState("");
 
   // ==========================================
-  // GET ALL PLAYERS
+  // GET ALL PLAYER
   // ==========================================
 
   useEffect(() => {
