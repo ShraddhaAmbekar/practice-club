@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import API_URL from "../../api";
 
 function AnchorDashboard({ user, onLogout }) {
   const [players, setPlayers] = useState([]);
@@ -24,7 +25,7 @@ function AnchorDashboard({ user, onLogout }) {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/players",
+        "`${API_URL}/api/auth/players`",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -57,7 +58,7 @@ function AnchorDashboard({ user, onLogout }) {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/players/${id}`,
+        `${API_URL}/api/players/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import logo from "../assets/logo.png";
+import  API_URL from "../api";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -21,7 +22,7 @@ function Login({ onLogin }) {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/login",
+        `${API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: {

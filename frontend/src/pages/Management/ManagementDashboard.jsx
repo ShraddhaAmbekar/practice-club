@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ExcelJS from "exceljs";
 import PlayerForm from "../DataEntry/PlayerForm";
+import API_URL from "../../api";
 
 function ManagementDashboard({ user, onLogout }) {
   const [players, setPlayers] = useState([]);
@@ -34,7 +35,7 @@ function ManagementDashboard({ user, onLogout }) {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/players",
+        `${API_URL}/api/players`,
         {
           method: "GET",
           headers: {
@@ -80,7 +81,7 @@ function ManagementDashboard({ user, onLogout }) {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/players/${playerId}`,
+        `${API_URL}/api/players/${playerId}`,
         {
           method: "GET",
           headers: {
@@ -137,7 +138,7 @@ function ManagementDashboard({ user, onLogout }) {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/players/${playerId}`,
+        `${API_URL}/api/players/${playerId}`,
         {
           method: "DELETE",
           headers: {

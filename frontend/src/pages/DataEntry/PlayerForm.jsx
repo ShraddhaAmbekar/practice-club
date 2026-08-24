@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import API_URL from "./../../api";
 
 function PlayerForm({ player, onSave, onCancel }) {
   const getInitialForm = () => ({
@@ -393,7 +394,7 @@ function PlayerForm({ player, onSave, onCancel }) {
       number.trim()
     );
   };
-
+const API_URL = import.meta.env.VITE_API_URL;
   // =========================================================
   // SUBMIT
   // =========================================================
@@ -526,8 +527,8 @@ function PlayerForm({ player, onSave, onCancel }) {
       );
 
       const url = isEdit
-        ? `http://localhost:5000/api/players/${player._id}`
-        : "http://localhost:5000/api/players";
+  ? `${API_URL}/api/players/${player._id}`
+  : `${API_URL}/api/players`;
 
       const method = isEdit
         ? "PUT"
