@@ -9,41 +9,40 @@ const playerRoutes = require("./routes/playerRoutes");
 const app = express();
 
 // ==========================================
-// CORS - MANUAL + CORS PACKAGE
+// CORS
 // ==========================================
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://practice-club-five.vercel.app",
+];
 
-  if (origin === "http://localhost:5173") {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-  }
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests without origin
+    // (Postman, server-to-server, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
 
-  // Handle browser preflight request
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-  next();
-});
+    return callback(new Error(`CORS not allowed for origin: ${origin}`));
+  },
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
+
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // ==========================================
 // MIDDLEWARE
@@ -53,7 +52,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ==========================================
-// ROOT
+// ROOT ROUTE
 // ==========================================
 
 app.get("/", (req, res) => {
@@ -63,7 +62,7 @@ app.get("/", (req, res) => {
 });
 
 // ==========================================
-// ROUTES
+// API ROUTES
 // ==========================================
 
 app.use("/api/auth", authRoutes);
