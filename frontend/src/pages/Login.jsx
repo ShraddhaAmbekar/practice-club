@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo1 from "../assets/logo.png";
+import logo from "../assets/logo.png";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -77,33 +77,7 @@ function Login({ onLogin }) {
 
       <header className="relative z-20 px-5 sm:px-8 lg:px-14 py-4 sm:py-5">
 
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-
-          <div className="flex items-center gap-3">
-
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#111111] flex items-center justify-center overflow-hidden shadow-lg shadow-[#D4A017]/20">
-
-              <img
-                src={logo1}
-                alt="Practice Football Club Logo"
-                className="w-full h-full object-contain p-1"
-              />
-
-            </div>
-
-            <div>
-              <h2 className="text-xs sm:text-sm font-black tracking-tight text-[#111111]">
-                PRACTICE
-              </h2>
-
-              <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-[#8A5A0A]/60">
-                Football Club
-              </p>
-            </div>
-
-          </div>
-
-        </div>
+        
 
       </header>
 
@@ -127,10 +101,10 @@ function Login({ onLogin }) {
 
                 <div className="flex items-center justify-start">
 
-                  <div className="w-[380px] h-[380px] xl:w-[440px] xl:h-[440px] flex items-center justify-center">
+                  <div className="w-[380px] h-[380px] xl:w-[380px] xl:h-[380px] flex items-center justify-center">
 
                     <img
-                      src={logo1}
+                      src={logo}
                       alt="Practice Football Club Logo"
                       className="w-full h-full object-contain"
                     />
@@ -210,7 +184,7 @@ function Login({ onLogin }) {
                 <div className="mx-auto mb-4 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#111111] flex items-center justify-center overflow-hidden shadow-xl shadow-[#D4A017]/20">
 
                   <img
-                    src={logo1}
+                    src={logo}
                     alt="Practice Football Club Logo"
                     className="w-full h-full object-contain p-2"
                   />

@@ -6,7 +6,6 @@ import DataEntryDashboard from "./pages/DataEntry/DataEntryDashboard";
 import AnchorDashboard from "./pages/Anchor/AnchorDashboard";
 
 function App() {
-  
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   const handleLogin = (user) => {
@@ -18,8 +17,16 @@ function App() {
     localStorage.removeItem("token");
   };
 
+  // ==========================================
+  // LOGIN
+  // ==========================================
+
   if (!loggedInUser) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <Login onLogin={handleLogin} />
+      </div>
+    );
   }
 
   // ==========================================
@@ -28,10 +35,12 @@ function App() {
 
   if (loggedInUser.role === "admin") {
     return (
-      <ManagementDashboard
-        user={loggedInUser}
-        onLogout={handleLogout}
-      />
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <ManagementDashboard
+          user={loggedInUser}
+          onLogout={handleLogout}
+        />
+      </div>
     );
   }
 
@@ -41,10 +50,12 @@ function App() {
 
   if (loggedInUser.role === "data_entry") {
     return (
-      <DataEntryDashboard
-        user={loggedInUser}
-        onLogout={handleLogout}
-      />
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <DataEntryDashboard
+          user={loggedInUser}
+          onLogout={handleLogout}
+        />
+      </div>
     );
   }
 
@@ -54,11 +65,13 @@ function App() {
 
   if (loggedInUser.role === "anchor") {
     return (
-      <AnchorDashboard
-        user={loggedInUser}
-        users={[]}
-        onLogout={handleLogout}
-      />
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <AnchorDashboard
+          user={loggedInUser}
+          users={[]}
+          onLogout={handleLogout}
+        />
+      </div>
     );
   }
 
