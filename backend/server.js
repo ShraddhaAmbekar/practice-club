@@ -12,14 +12,21 @@ const app = express();
 // CORS
 // ==========================================
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+// ==========================================
+// PREFLIGHT
+// ==========================================
+
+app.options("/api/players", cors(corsOptions));
+app.options("/api/auth/login", cors(corsOptions));
 
 // ==========================================
 // MIDDLEWARE
