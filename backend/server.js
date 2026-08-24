@@ -22,13 +22,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // ==========================================
-// PREFLIGHT
-// ==========================================
-
-app.options("/api/players", cors(corsOptions));
-app.options("/api/auth/login", cors(corsOptions));
-
-// ==========================================
 // MIDDLEWARE
 // ==========================================
 
