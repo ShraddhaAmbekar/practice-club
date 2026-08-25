@@ -869,6 +869,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                 name="birthDate"
                 value={form.birthDate}
                 onChange={handleChange}
+                required
               />
 
               <InputField

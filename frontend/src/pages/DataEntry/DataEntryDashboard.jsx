@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PlayerForm from "./PlayerForm";
+import logo from "../../assets/logo.png"
 
 function DataEntryDashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
@@ -42,10 +43,12 @@ function DataEntryDashboard({ user, onLogout }) {
               <div className="flex items-center gap-3">
 
                 {/* LOGO */}
-                <div className="w-11 h-11 rounded-xl bg-[#D4A017] flex items-center justify-center shadow-lg shadow-black/20">
-                  <span className="text-sm font-black text-[#111111]">
-                    FC
-                  </span>
+                <div className="w-11 h-11 rounded-xl  flex items-center justify-center shadow-lg shadow-black/20">
+                  <img
+    src={logo}
+    alt="Practice Football Club Logo"
+    className="w-full h-full object-contain"
+  />
                 </div>
 
                 <div className="hidden sm:block">
@@ -228,7 +231,7 @@ function DataEntryDashboard({ user, onLogout }) {
 
               <p className="mt-1 text-sm text-[#6F6250]">
                 येथे Practice Football Club मधील
-                खेळाडूंची नवीन माहिती नोंदवू शकता.
+                माजी खेळाडूंची माहिती नोंदवू शकता.
               </p>
 
             </div>
@@ -262,7 +265,7 @@ function DataEntryDashboard({ user, onLogout }) {
                 <div className="flex items-center gap-3">
 
                   <h2 className="text-xl font-black text-[#111111]">
-                    Player Registration
+                    Invitees Registration
                   </h2>
 
                   <span className="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#D4A017] text-[#111111] text-[9px] font-black uppercase tracking-wider">
@@ -272,7 +275,7 @@ function DataEntryDashboard({ user, onLogout }) {
                 </div>
 
                 <p className="mt-1 text-sm text-[#9A8F7D]">
-                  नवीन खेळाडूची माहिती व्यवस्थित नोंदवा.
+                 माजी खेळाडूची माहिती व्यवस्थित नोंदवा.
                 </p>
 
               </div>

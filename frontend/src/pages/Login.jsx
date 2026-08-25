@@ -182,7 +182,7 @@ function Login({ onLogin }) {
 
               <div className="lg:hidden text-center mb-6 sm:mb-8">
 
-                <div className="mx-auto mb-4 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#111111] flex items-center justify-center overflow-hidden shadow-xl shadow-[#D4A017]/20">
+                <div className="mx-auto mb-4 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center overflow-hidden shadow-xl shadow-[#D4A017]/20">
 
                   <img
                     src={logo}

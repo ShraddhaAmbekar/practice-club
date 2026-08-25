@@ -1,3 +1,3 @@
-const API_URL = "https://practice-club-1.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;;
 
 export default API_URL;
