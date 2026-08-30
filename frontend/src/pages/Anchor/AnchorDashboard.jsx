@@ -39,10 +39,7 @@ function AnchorDashboard({ user, onLogout }) {
 
     const text = await response.text();
 
-    console.error(
-      "Non-JSON API Response:",
-      text
-    );
+    console.error("Non-JSON API Response:", text);
 
     throw new Error(
       `Server Error: ${response.status} ${response.statusText}`
@@ -50,7 +47,7 @@ function AnchorDashboard({ user, onLogout }) {
   };
 
   // =====================================================
-  // FETCH PLAYERS + GATE ENTRIES
+  // FETCH ALL DATA
   // =====================================================
 
   const fetchAllData = async () => {
@@ -58,8 +55,7 @@ function AnchorDashboard({ user, onLogout }) {
       setLoading(true);
       setError("");
 
-      const token =
-        localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       if (!token) {
         throw new Error(
@@ -186,11 +182,21 @@ function AnchorDashboard({ user, onLogout }) {
   // =====================================================
 
   const getPlayerFromEntry = (entry) => {
-    const playerId =
-      getPlayerId(entry);
+    const playerId = getPlayerId(entry);
 
     if (!playerId) {
       return null;
+    }
+
+    // Sometimes player is already populated
+    if (
+      typeof entry.player === "object" &&
+      entry.player?._id
+    ) {
+      return {
+        ...entry.player,
+        gateEntry: entry,
+      };
     }
 
     const player = players.find(
@@ -210,7 +216,7 @@ function AnchorDashboard({ user, onLogout }) {
   };
 
   // =====================================================
-  // COMPLETED / CHECKED-IN PLAYERS
+  // ALL CHECKED-IN PLAYERS
   // =====================================================
 
   const completedPlayers = useMemo(() => {
@@ -254,13 +260,60 @@ function AnchorDashboard({ user, onLogout }) {
   }, [completedEntries, players]);
 
   // =====================================================
-  // GROUP PLAYERS YEAR-WISE
+  // PENDING AWARD PLAYERS
   // =====================================================
 
-  const groupedCompletedPlayers = useMemo(() => {
+  const pendingAwardPlayers = useMemo(() => {
+    return completedPlayers.filter(
+      (player) =>
+        player.gateEntry?.awarded !== true
+    );
+  }, [completedPlayers]);
+
+  // =====================================================
+  // AWARDED PLAYERS
+  // =====================================================
+
+  const awardedPlayers = useMemo(() => {
+    return completedPlayers
+      .filter(
+        (player) =>
+          player.gateEntry?.awarded === true
+      )
+      .sort((a, b) => {
+        const yearA = Number(
+          a.practiceClubFromYear
+        );
+
+        const yearB = Number(
+          b.practiceClubFromYear
+        );
+
+        if (
+          !Number.isNaN(yearA) &&
+          !Number.isNaN(yearB)
+        ) {
+          if (yearA !== yearB) {
+            return yearA - yearB;
+          }
+        }
+
+        return (
+          a.fullName || ""
+        ).localeCompare(
+          b.fullName || ""
+        );
+      });
+  }, [completedPlayers]);
+
+  // =====================================================
+  // GROUP PENDING PLAYERS YEAR-WISE
+  // =====================================================
+
+  const groupedPendingPlayers = useMemo(() => {
     const groups = {};
 
-    completedPlayers.forEach((player) => {
+    pendingAwardPlayers.forEach((player) => {
       const rawYear =
         player.practiceClubFromYear;
 
@@ -298,7 +351,54 @@ function AnchorDashboard({ user, onLogout }) {
         );
       }
     );
-  }, [completedPlayers]);
+  }, [pendingAwardPlayers]);
+
+  // =====================================================
+  // GROUP AWARDED PLAYERS YEAR-WISE
+  // =====================================================
+
+  const groupedAwardedPlayers = useMemo(() => {
+    const groups = {};
+
+    awardedPlayers.forEach((player) => {
+      const rawYear =
+        player.practiceClubFromYear;
+
+      const year =
+        rawYear !== undefined &&
+        rawYear !== null &&
+        String(rawYear).trim() !== ""
+          ? String(rawYear)
+          : "Year Not Available";
+
+      if (!groups[year]) {
+        groups[year] = [];
+      }
+
+      groups[year].push(player);
+    });
+
+    return Object.entries(groups).sort(
+      ([yearA], [yearB]) => {
+        if (
+          yearA === "Year Not Available"
+        ) {
+          return 1;
+        }
+
+        if (
+          yearB === "Year Not Available"
+        ) {
+          return -1;
+        }
+
+        return (
+          Number(yearA) -
+          Number(yearB)
+        );
+      }
+    );
+  }, [awardedPlayers]);
 
   // =====================================================
   // AWARD PLAYER
@@ -331,26 +431,25 @@ function AnchorDashboard({ user, onLogout }) {
         );
       }
 
-      // =================================================
-      // IMPORTANT DEBUG
-      // =================================================
-
       console.log(
         "Award Gate Entry ID:",
         gateEntryId
       );
 
+      const awardUrl =
+        `${API_URL}/api/gate-entries/${gateEntryId}/award`;
+
       console.log(
         "Award API URL:",
-        `${API_URL}/api/gate-entries/${gateEntryId}/award`
+        awardUrl
       );
 
       // =================================================
-      // API REQUEST
+      // AWARD API
       // =================================================
 
       const response = await fetch(
-        `${API_URL}/api/gate-entries/${gateEntryId}/award`,
+        awardUrl,
         {
           method: "PUT",
           headers: {
@@ -381,34 +480,30 @@ function AnchorDashboard({ user, onLogout }) {
       }
 
       // =================================================
-      // UPDATE LOCAL GATE ENTRY
+      // UPDATE LOCAL DATA
       // =================================================
 
-      setGateEntries((prevEntries) =>
-        prevEntries.map((entry) =>
-          String(entry._id) ===
-          String(gateEntryId)
-            ? {
-                ...entry,
-                awarded: true,
-              }
-            : entry
-        )
+      setGateEntries(
+        (prevEntries) =>
+          prevEntries.map(
+            (entry) =>
+              String(entry._id) ===
+              String(gateEntryId)
+                ? {
+                    ...entry,
+                    awarded: true,
+                  }
+                : entry
+          )
       );
 
       // =================================================
-      // UPDATE SELECTED PLAYER IF OPEN
+      // SUCCESS MESSAGE
       // =================================================
 
-      if (selectedPlayer) {
-        setSelectedPlayer((prev) =>
-          prev
-            ? {
-                ...prev,
-              }
-            : prev
-        );
-      }
+      console.log(
+        "Player Awarded Successfully"
+      );
     } catch (err) {
       console.error(
         "Award Player Error:",
@@ -462,7 +557,11 @@ function AnchorDashboard({ user, onLogout }) {
         );
       }
 
-      setSelectedPlayer(data);
+      // Handle both possible API response formats
+      const playerData =
+        data.player || data;
+
+      setSelectedPlayer(playerData);
     } catch (err) {
       console.error(
         "View Player Error:",
@@ -524,7 +623,9 @@ function AnchorDashboard({ user, onLogout }) {
           {/* HEADER */}
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
             <div className="min-w-0">
+
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8A5A0A]">
                 Practice Football Club
               </p>
@@ -536,6 +637,7 @@ function AnchorDashboard({ user, onLogout }) {
               <p className="mt-1 truncate text-sm text-[#6F6250]">
                 {selectedPlayer.fullName}
               </p>
+
             </div>
 
             <button
@@ -544,23 +646,28 @@ function AnchorDashboard({ user, onLogout }) {
             >
               Logout
             </button>
+
           </div>
 
           {/* ERROR */}
 
           {error && (
             <div className="mb-5 flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm font-semibold text-red-600">
+
               <span className="break-words">
                 {error}
               </span>
 
               <button
                 type="button"
-                onClick={() => setError("")}
+                onClick={() =>
+                  setError("")
+                }
                 className="shrink-0 text-lg"
               >
                 ×
               </button>
+
             </div>
           )}
 
@@ -571,6 +678,7 @@ function AnchorDashboard({ user, onLogout }) {
             {/* PHOTO + STATUS */}
 
             <div className="rounded-[22px] border border-emerald-200 bg-white p-5 shadow-sm">
+
               <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
 
                 {selectedPlayer.photo ? (
@@ -586,6 +694,7 @@ function AnchorDashboard({ user, onLogout }) {
                 )}
 
                 <div className="min-w-0">
+
                   <h2 className="break-words text-2xl font-black text-[#111111]">
                     {selectedPlayer.fullName}
                   </h2>
@@ -611,22 +720,29 @@ function AnchorDashboard({ user, onLogout }) {
                     )}
 
                   </div>
+
                 </div>
 
               </div>
+
             </div>
 
             {/* PERSONAL INFORMATION */}
 
             <InfoSection title="वैयक्तिक माहिती">
+
               <Detail
                 label="पूर्ण नाव"
-                value={selectedPlayer.fullName}
+                value={
+                  selectedPlayer.fullName
+                }
               />
 
               <Detail
                 label="टोपण नाव"
-                value={selectedPlayer.nickname}
+                value={
+                  selectedPlayer.nickname
+                }
               />
 
               <Detail
@@ -656,11 +772,13 @@ function AnchorDashboard({ user, onLogout }) {
                   selectedPlayer.foodPreference
                 }
               />
+
             </InfoSection>
 
             {/* FOOTBALL INFORMATION */}
 
             <InfoSection title="Football माहिती">
+
               <Detail
                 label="Football सुरू केलेले वर्ष"
                 value={
@@ -697,6 +815,7 @@ function AnchorDashboard({ user, onLogout }) {
                   selectedPlayer.playingPosition
                 }
               />
+
             </InfoSection>
 
             {/* MEMORABLE COMPETITIONS */}
@@ -707,6 +826,7 @@ function AnchorDashboard({ user, onLogout }) {
                 .memorableCompetitions
                 ?.length ? (
                 <ul className="space-y-2">
+
                   {selectedPlayer.memorableCompetitions.map(
                     (item, index) => (
                       <li
@@ -717,6 +837,7 @@ function AnchorDashboard({ user, onLogout }) {
                       </li>
                     )
                   )}
+
                 </ul>
               ) : (
                 <p className="text-sm text-slate-400">
@@ -740,6 +861,7 @@ function AnchorDashboard({ user, onLogout }) {
                 .relativesInPracticeClub
                 ?.length > 0 && (
                 <ul className="mt-4 space-y-2">
+
                   {selectedPlayer.relativesInPracticeClub.map(
                     (relative, index) => (
                       <li
@@ -749,10 +871,12 @@ function AnchorDashboard({ user, onLogout }) {
                         <strong>
                           {relative.name}
                         </strong>{" "}
-                        - {relative.relation}
+                        -{" "}
+                        {relative.relation}
                       </li>
                     )
                   )}
+
                 </ul>
               )}
 
@@ -840,7 +964,7 @@ function AnchorDashboard({ user, onLogout }) {
               }
               className="h-12 w-full rounded-xl bg-[#111111] text-sm font-black text-white transition hover:bg-[#222222]"
             >
-              ← Back to Completed List
+              ← Back to Dashboard
             </button>
 
           </div>
@@ -849,44 +973,40 @@ function AnchorDashboard({ user, onLogout }) {
         {/* DETAILS LOADING */}
 
         {detailsLoading && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
-
-            <div className="w-full max-w-sm rounded-2xl bg-white px-6 py-5 shadow-2xl">
-
-              <div className="flex items-center justify-center gap-3">
-
-                <div className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-slate-200 border-t-[#D4A017]" />
-
-                <p className="text-sm font-bold text-slate-600">
-                  Player माहिती load होत आहे...
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
+          <LoadingOverlay
+            text="Player माहिती load होत आहे..."
+          />
         )}
+
       </div>
     );
   }
 
   // =====================================================
-  // MAIN DASHBOARD
+  // COUNTS
   // =====================================================
 
+  const checkedInCount =
+    completedPlayers.length;
+
+  const pendingAwardCount =
+    pendingAwardPlayers.length;
+
   const awardedCount =
-    completedPlayers.filter(
-      (player) =>
-        player.gateEntry?.awarded === true
-    ).length;
+    awardedPlayers.length;
+
+  // =====================================================
+  // MAIN DASHBOARD
+  // =====================================================
 
   return (
     <div className="min-h-screen bg-[#FFFDF7] px-4 py-6 sm:px-6 lg:px-10">
 
       <div className="mx-auto max-w-7xl">
 
-        {/* HEADER */}
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
         <div className="mb-7">
 
@@ -913,7 +1033,8 @@ function AnchorDashboard({ user, onLogout }) {
               </div>
 
               <p className="mt-3 text-sm text-[#6F6250]">
-                Welcome, {user?.name || "Anchor"}
+                Welcome,{" "}
+                {user?.name || "Anchor"}
               </p>
 
             </div>
@@ -929,7 +1050,9 @@ function AnchorDashboard({ user, onLogout }) {
 
         </div>
 
-        {/* ERROR */}
+        {/* =================================================
+            ERROR
+        ================================================= */}
 
         {error && (
           <div className="mb-5 flex items-start justify-between gap-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm font-semibold text-red-600 sm:px-5">
@@ -940,7 +1063,9 @@ function AnchorDashboard({ user, onLogout }) {
 
             <button
               type="button"
-              onClick={() => setError("")}
+              onClick={() =>
+                setError("")
+              }
               className="shrink-0 text-lg"
             >
               ×
@@ -949,45 +1074,46 @@ function AnchorDashboard({ user, onLogout }) {
           </div>
         )}
 
-        {/* SUMMARY */}
+        {/* =================================================
+            SUMMARY
+        ================================================= */}
 
-        <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
           {/* CHECKED IN */}
 
-          <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
+          <SummaryCard
+            label="Checked-In Players"
+            count={checkedInCount}
+            color="emerald"
+            icon="✓"
+          />
 
-            <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
-              Checked-In Players
-            </p>
+          {/* PENDING */}
 
-            <p className="mt-2 text-3xl font-black text-emerald-700">
-              {completedPlayers.length}
-            </p>
-
-          </div>
+          <SummaryCard
+            label="Pending Awards"
+            count={pendingAwardCount}
+            color="orange"
+            icon="⏳"
+          />
 
           {/* AWARDED */}
 
-          <div className="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
-
-            <p className="text-[10px] font-black uppercase tracking-wider text-amber-600">
-              Awarded Players
-            </p>
-
-            <p className="mt-2 text-3xl font-black text-amber-700">
-              {awardedCount}
-            </p>
-
-          </div>
+          <SummaryCard
+            label="Awarded Players"
+            count={awardedCount}
+            color="amber"
+            icon="🏆"
+          />
 
         </div>
 
-        {/* CHECKED-IN PLAYERS */}
+        {/* =================================================
+            PENDING AWARD PLAYERS
+        ================================================= */}
 
         <section>
-
-          {/* SECTION HEADER */}
 
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
@@ -1006,7 +1132,7 @@ function AnchorDashboard({ user, onLogout }) {
                   </h2>
 
                   <p className="mt-1 text-xs text-[#9A8F7D]">
-                    Gate Entry झालेल्या Players ची यादी
+                    Award बाकी असलेल्या Players ची यादी
                   </p>
 
                 </div>
@@ -1036,52 +1162,40 @@ function AnchorDashboard({ user, onLogout }) {
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[#D4A017]" />
 
               <p className="mt-4 text-sm font-semibold text-slate-400">
-                Checked-In Players load होत आहेत...
+                Players load होत आहेत...
               </p>
 
             </div>
-          ) : completedPlayers.length === 0 ? (
-            <div className="rounded-[22px] border border-[#E8D49A] bg-white p-12 text-center">
+          ) : pendingAwardPlayers.length === 0 ? (
+
+            <div className="rounded-[22px] border border-emerald-200 bg-white p-12 text-center">
 
               <div className="text-4xl">
-                ✓
+                🏆
               </div>
 
               <p className="mt-3 text-sm font-bold text-slate-500">
-                अजून कोणत्याही Player ची Gate Entry झालेली नाही.
+                सर्व Checked-In Players ना Award दिला आहे.
               </p>
 
             </div>
-          ) : (
 
-            /* YEAR-WISE LIST */
+          ) : (
 
             <div className="space-y-8">
 
-              {groupedCompletedPlayers.map(
+              {groupedPendingPlayers.map(
                 ([year, yearPlayers]) => (
 
                   <div key={year}>
 
-                    {/* YEAR HEADER */}
+                   
 
-                    <div className="mb-3 flex items-center gap-3">
+                  
 
-                      <div className="flex h-10 min-w-[90px] shrink-0 items-center justify-center rounded-xl bg-emerald-600 px-4">
+              
 
-                        <span className="text-sm font-black text-white">
-                          {year}
-                        </span>
-
-                      </div>
-
-                      <div className="h-px flex-1 bg-emerald-200" />
-
-                      <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-                        {yearPlayers.length}
-                      </span>
-
-                    </div>
+                      
 
                     {/* PLAYERS */}
 
@@ -1094,157 +1208,25 @@ function AnchorDashboard({ user, onLogout }) {
                             player.gateEntry;
 
                           return (
-                            <div
+                            <PlayerListCard
                               key={player._id}
-                              className="overflow-hidden rounded-[20px] border border-emerald-200 bg-white shadow-[0_8px_25px_rgba(16,185,129,0.05)]"
-                            >
-
-                              <div className="p-4 sm:p-5">
-
-                                <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-
-                                  {/* PLAYER */}
-
-                                  <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-xs font-black text-emerald-700">
-                                      {index + 1}
-                                    </div>
-
-                                    {player.photo ? (
-                                      <img
-                                        src={player.photo}
-                                        alt={player.fullName}
-                                        className="h-14 w-14 shrink-0 rounded-xl border border-emerald-100 object-cover"
-                                      />
-                                    ) : (
-                                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-xl">
-                                        ⚽
-                                      </div>
-                                    )}
-
-                                    <div className="min-w-0">
-
-                                      <h3 className="truncate text-base font-black text-[#111111]">
-                                        {player.fullName}
-                                      </h3>
-
-                                      {player.nickname && (
-                                        <p className="mt-0.5 truncate text-xs text-slate-400">
-                                          {player.nickname}
-                                        </p>
-                                      )}
-
-                                      <div className="mt-2 flex flex-wrap gap-2">
-
-                                        <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-700">
-                                          ✓ Checked In
-                                        </span>
-
-                                        {gateEntry?.awarded && (
-                                          <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black text-amber-700">
-                                            🏆 Awarded
-                                          </span>
-                                        )}
-
-                                      </div>
-
-                                    </div>
-
-                                  </div>
-
-                                  {/* JOIN YEAR */}
-
-                                  <div className="w-full rounded-xl bg-slate-50 px-5 py-3 lg:w-auto lg:min-w-[140px]">
-
-                                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                                      Join Year
-                                    </p>
-
-                                    <p className="mt-1 text-xl font-black text-[#111111]">
-                                      {player.practiceClubFromYear || "-"}
-                                    </p>
-
-                                  </div>
-
-                                  {/* CHECK-IN DATE */}
-
-                                  <div className="w-full rounded-xl bg-emerald-50 px-5 py-3 lg:w-auto lg:min-w-[160px]">
-
-                                    <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
-                                      Checked In
-                                    </p>
-
-                                    <p className="mt-1 text-xs font-bold text-emerald-700">
-                                      {gateEntry?.checkedInAt
-                                        ? formatDate(
-                                            gateEntry.checkedInAt
-                                          )
-                                        : "Completed"}
-                                    </p>
-
-                                  </div>
-
-                                  {/* AWARD */}
-
-                                  {!gateEntry?.awarded ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        console.log(
-                                          "Award button clicked"
-                                        );
-
-                                        console.log(
-                                          "Gate Entry:",
-                                          gateEntry
-                                        );
-
-                                        console.log(
-                                          "Gate Entry ID:",
-                                          gateEntry?._id
-                                        );
-
-                                        handleAwardPlayer(
-                                          gateEntry?._id
-                                        );
-                                      }}
-                                      disabled={
-                                        awardLoading ===
-                                        gateEntry?._id
-                                      }
-                                      className="h-11 w-full rounded-xl bg-[#D4A017] px-5 text-sm font-black text-white transition hover:bg-[#B8860B] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
-                                    >
-                                      {awardLoading ===
-                                      gateEntry?._id
-                                        ? "Awarding..."
-                                        : "🏆 Award"}
-                                    </button>
-                                  ) : (
-                                    <div className="flex h-11 w-full items-center justify-center rounded-xl bg-amber-50 px-5 text-sm font-black text-amber-700 lg:w-auto">
-                                      🏆 Awarded
-                                    </div>
-                                  )}
-
-                                  {/* VIEW */}
-
-                                  <button
-                                    type="button"
-                                    className="h-11 w-full rounded-xl bg-[#111111] px-6 text-sm font-black text-white transition hover:bg-[#222222] lg:w-auto"
-                                    onClick={() =>
-                                      handleViewPlayer(
-                                        player._id
-                                      )
-                                    }
-                                  >
-                                    View
-                                  </button>
-
-                                </div>
-
-                              </div>
-
-                            </div>
+                              player={player}
+                              gateEntry={gateEntry}
+                              index={index}
+                              showAward
+                              awardLoading={
+                                awardLoading
+                              }
+                              onAward={
+                                handleAwardPlayer
+                              }
+                              onView={
+                                handleViewPlayer
+                              }
+                              formatDate={
+                                formatDate
+                              }
+                            />
                           );
                         }
                       )}
@@ -1252,6 +1234,7 @@ function AnchorDashboard({ user, onLogout }) {
                     </div>
 
                   </div>
+
                 )
               )}
 
@@ -1260,19 +1243,30 @@ function AnchorDashboard({ user, onLogout }) {
 
         </section>
 
-        {/* DETAILS LOADING */}
+        {/* =================================================
+            AWARDED PLAYERS
+        ================================================= */}
 
-        {detailsLoading && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
+        <section className="mt-12">
 
-            <div className="w-full max-w-sm rounded-2xl bg-white px-6 py-5 shadow-2xl">
+          {/* SECTION HEADER */}
 
-              <div className="flex items-center justify-center gap-3">
+          <div className="mb-5">
 
-                <div className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-slate-200 border-t-[#D4A017]" />
+            <div className="flex items-center gap-3">
 
-                <p className="text-sm font-bold text-slate-600">
-                  Player माहिती load होत आहे...
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-xl">
+                🏆
+              </div>
+
+              <div>
+
+                <h2 className="text-xl font-black text-[#111111] sm:text-2xl">
+                  Awarded Players
+                </h2>
+
+                <p className="mt-1 text-xs text-[#9A8F7D]">
+                  Award पूर्ण झालेल्या Players ची यादी
                 </p>
 
               </div>
@@ -1280,6 +1274,90 @@ function AnchorDashboard({ user, onLogout }) {
             </div>
 
           </div>
+
+          {awardedPlayers.length === 0 ? (
+
+            <div className="rounded-[22px] border border-amber-200 bg-white p-12 text-center">
+
+              <div className="text-4xl">
+                🏆
+              </div>
+
+              <p className="mt-3 text-sm font-bold text-slate-500">
+                अजून कोणत्याही Player ला Award दिलेला नाही.
+              </p>
+
+            </div>
+
+          ) : (
+
+            <div className="space-y-8">
+
+              {groupedAwardedPlayers.map(
+                ([year, yearPlayers]) => (
+
+                  <div key={year}>
+
+                    
+
+
+                      
+                    
+
+                    {/* AWARDED PLAYERS */}
+
+                    <div className="space-y-3">
+
+                      {yearPlayers.map(
+                        (player, index) => {
+
+                          const gateEntry =
+                            player.gateEntry;
+
+                          return (
+                            <PlayerListCard
+                              key={player._id}
+                              player={player}
+                              gateEntry={gateEntry}
+                              index={index}
+                              showAward={false}
+                              awardLoading={
+                                awardLoading
+                              }
+                              onAward={
+                                handleAwardPlayer
+                              }
+                              onView={
+                                handleViewPlayer
+                              }
+                              formatDate={
+                                formatDate
+                              }
+                              awarded
+                            />
+                          );
+                        }
+                      )}
+
+                    </div>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          )}
+
+        </section>
+
+        {/* DETAILS LOADING */}
+
+        {detailsLoading && (
+          <LoadingOverlay
+            text="Player माहिती load होत आहे..."
+          />
         )}
 
       </div>
@@ -1288,10 +1366,280 @@ function AnchorDashboard({ user, onLogout }) {
 }
 
 // =====================================================
+// PLAYER LIST CARD
+// =====================================================
+
+function PlayerListCard({
+  player,
+  gateEntry,
+  index,
+  showAward,
+  awardLoading,
+  onAward,
+  onView,
+  formatDate,
+  awarded = false,
+}) {
+  return (
+    <div
+      className={`overflow-hidden rounded-[20px] border bg-white shadow-sm ${
+        awarded
+          ? "border-amber-200 shadow-[0_8px_25px_rgba(245,158,11,0.05)]"
+          : "border-emerald-200 shadow-[0_8px_25px_rgba(16,185,129,0.05)]"
+      }`}
+    >
+
+      <div className="p-4 sm:p-5">
+
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+
+          {/* PLAYER */}
+
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-black ${
+                awarded
+                  ? "bg-amber-50 text-amber-700"
+                  : "bg-emerald-50 text-emerald-700"
+              }`}
+            >
+              {index + 1}
+            </div>
+
+            {player.photo ? (
+              <img
+                src={player.photo}
+                alt={player.fullName}
+                className={`h-14 w-14 shrink-0 rounded-xl border object-cover ${
+                  awarded
+                    ? "border-amber-100"
+                    : "border-emerald-100"
+                }`}
+              />
+            ) : (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-xl">
+                ⚽
+              </div>
+            )}
+
+            <div className="min-w-0">
+
+              <h3 className="truncate text-base font-black text-[#111111]">
+                {player.fullName}
+              </h3>
+
+              {player.nickname && (
+                <p className="mt-0.5 truncate text-xs text-slate-400">
+                  {player.nickname}
+                </p>
+              )}
+
+              <div className="mt-2 flex flex-wrap gap-2">
+
+                <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-700">
+                  ✓ Checked In
+                </span>
+
+                {awarded && (
+                  <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black text-amber-700">
+                    🏆 Awarded
+                  </span>
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* JOIN YEAR */}
+
+          <div className="w-full rounded-xl bg-slate-50 px-5 py-3 lg:w-auto lg:min-w-[140px]">
+
+            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              Join Year
+            </p>
+
+            <p className="mt-1 text-xl font-black text-[#111111]">
+              {player.practiceClubFromYear || "-"}
+            </p>
+
+          </div>
+
+          {/* CHECK-IN DATE */}
+
+          <div className="w-full rounded-xl bg-emerald-50 px-5 py-3 lg:w-auto lg:min-w-[160px]">
+
+            <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
+              Checked In
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-emerald-700">
+              {gateEntry?.checkedInAt
+                ? formatDate(
+                    gateEntry.checkedInAt
+                  )
+                : "-"}
+            </p>
+
+          </div>
+
+          {/* AWARD */}
+
+          {showAward && (
+            <button
+              type="button"
+              onClick={() =>
+                onAward(gateEntry?._id)
+              }
+              disabled={
+                awardLoading ===
+                gateEntry?._id
+              }
+              className="h-11 w-full rounded-xl bg-[#D4A017] px-5 text-sm font-black text-white transition hover:bg-[#B8860B] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+            >
+              {awardLoading ===
+              gateEntry?._id
+                ? "Awarding..."
+                : "🏆 Award"}
+            </button>
+          )}
+
+          {/* AWARDED STATUS */}
+
+          {awarded && (
+            <div className="flex h-11 w-full items-center justify-center rounded-xl bg-amber-50 px-5 text-sm font-black text-amber-700 lg:w-auto">
+              🏆 Awarded
+            </div>
+          )}
+
+          {/* VIEW */}
+
+          <button
+            type="button"
+            className="h-11 w-full rounded-xl bg-[#111111] px-6 text-sm font-black text-white transition hover:bg-[#222222] lg:w-auto"
+            onClick={() =>
+              onView(player._id)
+            }
+          >
+            View
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+// =====================================================
+// SUMMARY CARD
+// =====================================================
+
+function SummaryCard({
+  label,
+  count,
+  color,
+  icon,
+}) {
+  const colorClasses = {
+    emerald: {
+      border: "border-emerald-200",
+      label: "text-emerald-600",
+      count: "text-emerald-700",
+      icon: "bg-emerald-50",
+    },
+
+    orange: {
+      border: "border-orange-200",
+      label: "text-orange-600",
+      count: "text-orange-700",
+      icon: "bg-orange-50",
+    },
+
+    amber: {
+      border: "border-amber-200",
+      label: "text-amber-600",
+      count: "text-amber-700",
+      icon: "bg-amber-50",
+    },
+  };
+
+  const styles =
+    colorClasses[color] ||
+    colorClasses.emerald;
+
+  return (
+    <div
+      className={`rounded-2xl border bg-white p-5 shadow-sm ${styles.border}`}
+    >
+
+      <div className="flex items-start justify-between gap-3">
+
+        <div>
+
+          <p
+            className={`text-[10px] font-black uppercase tracking-wider ${styles.label}`}
+          >
+            {label}
+          </p>
+
+          <p
+            className={`mt-2 text-3xl font-black ${styles.count}`}
+          >
+            {count}
+          </p>
+
+        </div>
+
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-xl text-xl ${styles.icon}`}
+        >
+          {icon}
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+// =====================================================
+// LOADING OVERLAY
+// =====================================================
+
+function LoadingOverlay({ text }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
+
+      <div className="w-full max-w-sm rounded-2xl bg-white px-6 py-5 shadow-2xl">
+
+        <div className="flex items-center justify-center gap-3">
+
+          <div className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-slate-200 border-t-[#D4A017]" />
+
+          <p className="text-sm font-bold text-slate-600">
+            {text}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+// =====================================================
 // INFO SECTION
 // =====================================================
 
-function InfoSection({ title, children }) {
+function InfoSection({
+  title,
+  children,
+}) {
   return (
     <div className="rounded-[22px] border border-[#E8D49A] bg-white p-5 sm:p-6">
 
@@ -1311,7 +1659,10 @@ function InfoSection({ title, children }) {
 // DETAIL COMPONENT
 // =====================================================
 
-function Detail({ label, value }) {
+function Detail({
+  label,
+  value,
+}) {
   return (
     <div className="rounded-xl bg-slate-50 p-4">
 
