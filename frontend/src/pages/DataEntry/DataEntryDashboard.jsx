@@ -1,10 +1,97 @@
 import { useState } from "react";
 import PlayerForm from "./PlayerForm";
 import logo from "../../assets/logo.png"
+import GateEntry from "./GateEntry";
 
 function DataEntryDashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
+// ==========================================
+// GATE ENTRY
+// ==========================================
 
+if (activePage === "gate-entry") {
+  return (
+    <div className="min-h-screen bg-[#FFFDF7] text-[#111111]">
+
+      {/* TOP BAR */}
+
+      <div className="sticky top-0 z-30 border-b border-[#D4A017]/30 bg-gradient-to-r from-[#111111] via-[#111111] to-[#D4A017] backdrop-blur-md shadow-lg">
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4">
+
+          <div className="flex items-center justify-between gap-4">
+
+            {/* LEFT */}
+
+            <div className="flex items-center gap-3">
+
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center">
+
+                <img
+                  src={logo}
+                  alt="Practice Football Club Logo"
+                  className="w-full h-full object-contain"
+                />
+
+              </div>
+
+              <div className="hidden sm:block">
+
+                <p className="text-sm font-black text-white">
+                  PRACTICE FOOTBALL CLUB
+                </p>
+
+                <p className="text-[9px] uppercase tracking-[0.25em] text-[#D4A017]">
+                  Gate Entry
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* RIGHT */}
+
+            <div className="flex items-center gap-3">
+
+              <button
+                onClick={() => setActivePage("dashboard")}
+                className="group flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:border-[#D4A017] hover:bg-[#D4A017] hover:text-[#111111]"
+              >
+
+                <span className="text-lg transition-transform group-hover:-translate-x-1">
+                  ←
+                </span>
+
+                Dashboard वर जा
+
+              </button>
+
+              <button
+                onClick={onLogout}
+                className="rounded-xl border border-[#D4A017]/40 bg-[#111111] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#C99216]"
+              >
+                Logout
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* GATE ENTRY COMPONENT */}
+
+      <div className="relative z-10">
+
+        <GateEntry />
+
+      </div>
+
+    </div>
+  );
+}
   // ==========================================
   // PLAYER FORM
   // ==========================================
@@ -301,13 +388,74 @@ function DataEntryDashboard({ user, onLogout }) {
 
             </button>
 
+
           </div>
 
         </div>
 
-        {/* ==========================================
-            INFO
-        ========================================== */}
+
+       {/* ==========================================
+    GATE ENTRY CARD
+========================================== */}
+
+<div className="relative mt-5 rounded-[22px] border border-[#E8D49A] bg-white shadow-[0_15px_45px_rgba(138,90,10,0.08)] overflow-hidden">
+
+  {/* GOLD TOP LINE */}
+  <div className="h-1 bg-[#D4A017]" />
+
+  <div className="p-5 sm:p-7">
+
+    <div className="flex items-start gap-4">
+
+      {/* ICON */}
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-2xl shadow-md">
+        <span>🚪</span>
+      </div>
+
+      <div className="flex-1">
+
+        <div className="flex items-center gap-3">
+
+          <h2 className="text-xl font-black text-[#111111]">
+            Gate Entry
+          </h2>
+
+          <span className="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#D4A017] text-[#111111] text-[9px] font-black uppercase tracking-wider">
+            Event Entry
+          </span>
+
+        </div>
+
+        <p className="mt-1 text-sm text-[#9A8F7D]">
+          कार्यक्रमासाठी येणाऱ्या Player आणि Family Members ची
+          Gate Entry नोंदवा.
+        </p>
+
+      </div>
+
+    </div>
+
+    {/* BUTTON */}
+    <button
+      onClick={() => {
+        setActivePage("gate-entry");
+      }}
+      className="group mt-6 flex w-full sm:w-auto items-center justify-center gap-3 rounded-xl bg-[#111111] px-7 py-3.5 text-sm font-black text-white transition hover:bg-black hover:shadow-lg hover:shadow-black/20"
+    >
+
+      <span>
+        Gate Entry सुरू करा
+      </span>
+
+      <span className="text-lg text-[#D4A017] transition-transform group-hover:translate-x-1">
+        →
+      </span>
+
+    </button>
+
+  </div>
+
+</div>
 
       
 

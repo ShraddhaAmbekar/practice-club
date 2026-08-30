@@ -57,6 +57,12 @@ const gateEntrySchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+ awarded: {
+      type: Boolean,
+      default: false,
+    },
+  
+ 
 
     // ==========================================
     // GATE ENTRY STATUS
@@ -72,6 +78,7 @@ const gateEntrySchema = new mongoose.Schema(
       default: null,
     },
   },
+
   {
     timestamps: true,
   }

@@ -1,3 +1,4 @@
+
 const express = require("express");
 
 const {
@@ -6,6 +7,7 @@ const {
   getGateEntryById,
   updateGateEntry,
   getGateEntryByPlayer,
+  awardGateEntry,
 } = require("../controllers/gateEntryController");
 
 const router = express.Router();
@@ -14,45 +16,38 @@ const router = express.Router();
 // CREATE GATE ENTRY
 // ==========================================
 
-router.post(
-  "/",
-  createGateEntry
-);
+router.post("/", createGateEntry);
 
 // ==========================================
 // GET ALL GATE ENTRIES
 // ==========================================
 
-router.get(
-  "/",
-  getGateEntries
-);
+router.get("/", getGateEntries);
 
 // ==========================================
 // GET GATE ENTRY BY PLAYER
 // ==========================================
 
-router.get(
-  "/player/:playerId",
-  getGateEntryByPlayer
-);
+router.get("/player/:playerId", getGateEntryByPlayer);
+
+// ==========================================
+// AWARD PLAYER
+// IMPORTANT: This must be BEFORE /:id
+// ==========================================
+
+router.put("/:id/award", awardGateEntry);
 
 // ==========================================
 // GET SINGLE GATE ENTRY
 // ==========================================
 
-router.get(
-  "/:id",
-  getGateEntryById
-);
+router.get("/:id", getGateEntryById);
 
 // ==========================================
 // UPDATE ACTUAL GATE ENTRY
+// Gate Check-In
 // ==========================================
 
-router.put(
-  "/:id",
-  updateGateEntry
-);
+router.put("/:id", updateGateEntry);
 
 module.exports = router;

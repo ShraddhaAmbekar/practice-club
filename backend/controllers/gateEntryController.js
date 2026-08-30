@@ -64,8 +64,12 @@ const createGateEntry = async (req, res) => {
       actualVegMembers: 0,
       actualNonVegMembers: 0,
 
+      // Gate Check-In
       checkedIn: false,
       checkedInAt: null,
+
+      // Award Status
+      awarded: false,
     });
 
     // ------------------------------------------
@@ -73,13 +77,16 @@ const createGateEntry = async (req, res) => {
     // ------------------------------------------
 
     const populatedEntry =
-      await GateEntry.findById(gateEntry._id).populate(
+      await GateEntry.findById(
+        gateEntry._id
+      ).populate(
         "player",
-        "fullName nickname photo whatsappNumber"
+        "fullName nickname photo whatsappNumber practiceClubFromYear"
       );
 
     return res.status(201).json({
-      message: "Gate Entry created successfully.",
+      message:
+        "Gate Entry created successfully.",
       gateEntry: populatedEntry,
     });
   } catch (error) {
@@ -102,12 +109,13 @@ const createGateEntry = async (req, res) => {
 
 const getGateEntries = async (req, res) => {
   try {
-    const gateEntries = await GateEntry.find()
-      .populate(
-        "player",
-        "fullName nickname photo whatsappNumber"
-      )
-      .sort({ createdAt: -1 });
+    const gateEntries =
+      await GateEntry.find()
+        .populate(
+          "player",
+          "fullName nickname photo whatsappNumber practiceClubFromYear"
+        )
+        .sort({ createdAt: -1 });
 
     return res.status(200).json({
       message:
@@ -139,7 +147,7 @@ const getGateEntryById = async (req, res) => {
     const gateEntry =
       await GateEntry.findById(id).populate(
         "player",
-        "fullName nickname photo whatsappNumber"
+        "fullName nickname photo whatsappNumber practiceClubFromYear"
       );
 
     if (!gateEntry) {
@@ -169,6 +177,8 @@ const getGateEntryById = async (req, res) => {
 
 // ==========================================
 // UPDATE ACTUAL GATE ENTRY
+// Gate वर Operator actual members भरेल
+// यामुळे फक्त CHECK-IN होईल
 // ==========================================
 
 const updateGateEntry = async (req, res) => {
@@ -214,6 +224,13 @@ const updateGateEntry = async (req, res) => {
     gateEntry.checkedIn = true;
     gateEntry.checkedInAt = new Date();
 
+    // ------------------------------------------
+    // IMPORTANT
+    // Check-In केल्यावर Awarded होणार नाही
+    // ------------------------------------------
+
+    // awarded ची value येथे बदलायची नाही
+
     await gateEntry.save();
 
     // ------------------------------------------
@@ -223,7 +240,7 @@ const updateGateEntry = async (req, res) => {
     const updatedEntry =
       await GateEntry.findById(id).populate(
         "player",
-        "fullName nickname photo whatsappNumber"
+        "fullName nickname photo whatsappNumber practiceClubFromYear"
       );
 
     return res.status(200).json({
@@ -249,7 +266,10 @@ const updateGateEntry = async (req, res) => {
 // GET GATE ENTRY BY PLAYER
 // ==========================================
 
-const getGateEntryByPlayer = async (req, res) => {
+const getGateEntryByPlayer = async (
+  req,
+  res
+) => {
   try {
     const { playerId } = req.params;
 
@@ -258,7 +278,7 @@ const getGateEntryByPlayer = async (req, res) => {
         player: playerId,
       }).populate(
         "player",
-        "fullName nickname photo whatsappNumber"
+        "fullName nickname photo whatsappNumber practiceClubFromYear"
       );
 
     if (!gateEntry) {
@@ -288,6 +308,69 @@ const getGateEntryByPlayer = async (req, res) => {
 };
 
 // ==========================================
+// MARK PLAYER AS AWARDED / COMPLETED
+// Anchor कडून केले जाईल
+// ==========================================
+
+const awardGateEntry = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // ------------------------------------------
+    // Find Gate Entry
+    // ------------------------------------------
+
+    const gateEntry =
+      await GateEntry.findById(id);
+
+    if (!gateEntry) {
+      return res.status(404).json({
+        message: "Gate Entry not found.",
+      });
+    }
+
+    // ------------------------------------------
+    // Mark as Awarded
+    // ------------------------------------------
+
+    gateEntry.awarded = true;
+
+    // ------------------------------------------
+    // Awarded साठी कोणताही time नाही
+    // ------------------------------------------
+
+    await gateEntry.save();
+
+    // ------------------------------------------
+    // Populate Player
+    // ------------------------------------------
+
+    const updatedEntry =
+      await GateEntry.findById(id).populate(
+        "player",
+        "fullName nickname photo whatsappNumber practiceClubFromYear"
+      );
+
+    return res.status(200).json({
+      message:
+        "Player marked as Awarded successfully.",
+      gateEntry: updatedEntry,
+    });
+  } catch (error) {
+    console.error(
+      "Award Gate Entry Error:",
+      error
+    );
+
+    return res.status(500).json({
+      message:
+        "Server error while marking player as Awarded.",
+      error: error.message,
+    });
+  }
+};
+
+// ==========================================
 // EXPORT
 // ==========================================
 
@@ -297,4 +380,5 @@ module.exports = {
   getGateEntryById,
   updateGateEntry,
   getGateEntryByPlayer,
+  awardGateEntry,
 };
