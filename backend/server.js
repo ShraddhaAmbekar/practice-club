@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const playerRoutes = require("./routes/playerRoutes");
+const gateEntryRoutes = require("./routes/gateEntryRoutes");
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // ==========================================
 // ROOT ROUTE
 // ==========================================
@@ -67,6 +69,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/players", playerRoutes);
+app.use("/api/gate-entries", gateEntryRoutes);
 
 // ==========================================
 // DATABASE + SERVER
