@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-const API_URL = "http://localhost:5000";
+import  API_URL from "../api";
 
 function GateEntry() {
   // =====================================================
