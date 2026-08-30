@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import  API_URL from "../api";
+import API_URL from "../../api";
 
 function GateEntry() {
   // =====================================================
