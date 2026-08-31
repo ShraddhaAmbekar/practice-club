@@ -40,10 +40,10 @@ if (activePage === "gate-entry") {
                 <p className="text-sm font-black text-white">
                   PRACTICE FOOTBALL CLUB
                 </p>
-
+{/* 
                 <p className="text-[9px] uppercase tracking-[0.25em] text-[#D4A017]">
                   Gate Entry
-                </p>
+                </p> */}
 
               </div>
 
@@ -83,11 +83,11 @@ if (activePage === "gate-entry") {
 
       {/* GATE ENTRY COMPONENT */}
 
-      <div className="relative z-10">
+      {/* <div className="relative z-10">
 
         <GateEntry />
 
-      </div>
+      </div> */}
 
     </div>
   );
@@ -397,20 +397,20 @@ if (activePage === "gate-entry") {
        {/* ==========================================
     GATE ENTRY CARD
 ========================================== */}
-
+{/* 
 <div className="relative mt-5 rounded-[22px] border border-[#E8D49A] bg-white shadow-[0_15px_45px_rgba(138,90,10,0.08)] overflow-hidden">
 
   {/* GOLD TOP LINE */}
-  <div className="h-1 bg-[#D4A017]" />
+  {/* <div className="h-1 bg-[#D4A017]" />
 
   <div className="p-5 sm:p-7">
 
     <div className="flex items-start gap-4">
 
       {/* ICON */}
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-2xl shadow-md">
-        <span>🚪</span>
-      </div>
+      {/* <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-2xl shadow-md"> */}
+        {/* <span>🚪</span> */}
+      {/* </div>
 
       <div className="flex-1">
 
@@ -418,9 +418,9 @@ if (activePage === "gate-entry") {
 
           <h2 className="text-xl font-black text-[#111111]">
             Gate Entry
-          </h2>
+          </h2> */} 
 
-          <span className="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#D4A017] text-[#111111] text-[9px] font-black uppercase tracking-wider">
+          {/* <span className="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#D4A017] text-[#111111] text-[9px] font-black uppercase tracking-wider">
             Event Entry
           </span>
 
@@ -433,10 +433,10 @@ if (activePage === "gate-entry") {
 
       </div>
 
-    </div>
+    </div> */}
 
     {/* BUTTON */}
-    <button
+    {/* <button
       onClick={() => {
         setActivePage("gate-entry");
       }}
@@ -455,7 +455,7 @@ if (activePage === "gate-entry") {
 
   </div>
 
-</div>
+</div> */} 
 
       
 
