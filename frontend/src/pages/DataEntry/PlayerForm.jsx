@@ -808,17 +808,14 @@ const API_URL = import.meta.env.VITE_API_URL;
                   Player Photo
                 </label>
 
-                <input
-                
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={
-                    handlePhotoChange
-                  }
-                  disabled={loading}
-                  required
-                  className="block w-full min-w-0 overflow-hidden rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-3 py-3 text-xs file:mr-2 file:rounded-lg file:border-0 file:bg-[#FFF8E5] file:px-3 file:py-2 file:font-bold file:text-[#8A5A0A] hover:border-[#D4A017] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-sm sm:file:mr-4 sm:file:px-4"
-                />
+        <input
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  onChange={handlePhotoChange}
+  disabled={loading}
+  required={!form.photo}
+  className="block w-full min-w-0 overflow-hidden rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-3 py-3 text-xs file:mr-2 file:rounded-lg file:border-0 file:bg-[#FFF8E5] file:px-3 file:py-2 file:font-bold object:contain file:text-[#8A5A0A] hover:border-[#D4A017] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-sm sm:file:mr-4"
+/>
 
                 <p className="mt-2 text-xs text-[#9A8F7D]">
                   JPG, PNG किंवा WEBP. Maximum 5 MB.
