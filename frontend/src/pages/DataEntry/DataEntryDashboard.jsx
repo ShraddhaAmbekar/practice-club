@@ -371,7 +371,7 @@ if (activePage === "gate-entry") {
 
             {/* BUTTON */}
 
-            <button
+            {/* <button
               onClick={() => {
                 setActivePage("player-form");
               }}
@@ -386,7 +386,7 @@ if (activePage === "gate-entry") {
                 →
               </span>
 
-            </button>
+            </button> */}
 
 
           </div>
