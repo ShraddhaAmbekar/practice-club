@@ -813,7 +813,7 @@ const API_URL = import.meta.env.VITE_API_URL;
   accept="image/jpeg,image/png,image/webp"
   onChange={handlePhotoChange}
   disabled={loading}
-  required={!form.photo}
+  // required={!form.photo}
   className="block w-full min-w-0 overflow-hidden rounded-xl border border-[#E8D49A] bg-[#FFFDF7] px-3 py-3 text-xs file:mr-2 file:rounded-lg file:border-0 file:bg-[#FFF8E5] file:px-3 file:py-2 file:font-bold object:contain file:text-[#8A5A0A] hover:border-[#D4A017] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-sm sm:file:mr-4"
 />
 
@@ -868,7 +868,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                 name="birthDate"
                 value={form.birthDate}
                 onChange={handleChange}
-                required
+                // required
               />
 
               <InputField
@@ -880,7 +880,7 @@ const API_URL = import.meta.env.VITE_API_URL;
                 placeholder="10 अंकी क्रमांक"
                 maxLength="10"
                 inputMode="numeric"
-                required
+                // required
               />
 
               <InputField

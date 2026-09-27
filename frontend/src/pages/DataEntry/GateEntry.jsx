@@ -15,6 +15,9 @@ function GateEntry() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedGateEntry, setSelectedGateEntry] = useState(null);
 
+  // IMPORTANT:
+  // This stores ONLY actual family members.
+  // Player is automatically counted as +1.
   const [actualFamilyMembers, setActualFamilyMembers] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -76,19 +79,6 @@ function GateEntry() {
         );
       }
 
-      // -------------------------------------------------
-      // IMPORTANT:
-      // Your backend currently returns:
-      //
-      // return res.status(200).json(players);
-      //
-      // So playerData itself is an ARRAY.
-      //
-      // This code supports BOTH:
-      // 1. [player1, player2, ...]
-      // 2. { players: [player1, player2, ...] }
-      // -------------------------------------------------
-
       let playersList = [];
 
       if (Array.isArray(playerData)) {
@@ -129,12 +119,6 @@ function GateEntry() {
             "Gate Entries fetch करता आले नाहीत."
         );
       }
-
-      // -------------------------------------------------
-      // Support BOTH:
-      // 1. [entry1, entry2]
-      // 2. { gateEntries: [...] }
-      // -------------------------------------------------
 
       let gateEntriesList = [];
 
@@ -192,27 +176,41 @@ function GateEntry() {
   // =====================================================
 
   const filteredPlayers = useMemo(() => {
-    const searchText = search
-      .trim()
-      .toLowerCase();
+  const searchText = search
+    .trim()
+    .toLowerCase();
 
-    if (!searchText) {
-      return players;
-    }
+  // Only players who are NOT checked-in
+  const pendingPlayers = players.filter((player) => {
+    const entry = gateEntries.find((gateEntry) => {
+      const entryPlayerId =
+        typeof gateEntry.player === "object"
+          ? gateEntry.player?._id
+          : gateEntry.player;
 
-    return players.filter((player) => {
-      const fullName =
-        player.fullName?.toLowerCase() || "";
-
-      const nickname =
-        player.nickname?.toLowerCase() || "";
-
-      return (
-        fullName.includes(searchText) ||
-        nickname.includes(searchText)
-      );
+      return entryPlayerId === player._id;
     });
-  }, [players, search]);
+
+    return !entry?.checkedIn;
+  });
+
+  if (!searchText) {
+    return pendingPlayers;
+  }
+
+  return pendingPlayers.filter((player) => {
+    const fullName =
+      player.fullName?.toLowerCase() || "";
+
+    const nickname =
+      player.nickname?.toLowerCase() || "";
+
+    return (
+      fullName.includes(searchText) ||
+      nickname.includes(searchText)
+    );
+  });
+}, [players, gateEntries, search]);
 
   // =====================================================
   // GET GATE ENTRY FOR PLAYER
@@ -371,7 +369,7 @@ function GateEntry() {
       Number(actualFamilyMembers) < 0
     ) {
       setError(
-        "कृपया Actual Family Members संख्या भरा."
+        "कृपया प्रत्यक्ष आलेल्या कुटुंबीयांची संख्या भरा."
       );
 
       return;
@@ -458,6 +456,9 @@ function GateEntry() {
             },
 
             body: JSON.stringify({
+              // IMPORTANT:
+              // Only family members are saved here.
+              // Player is automatically counted as +1.
               actualFamilyMembers:
                 Number(actualFamilyMembers),
 
@@ -535,35 +536,55 @@ function GateEntry() {
 
   // =====================================================
   // TOTAL EXPECTED
+  // Player + Family
   // =====================================================
 
-  const totalExpected =
-    players.reduce(
-      (total, player) =>
+  const totalExpected = players.reduce(
+    (total, player) =>
+      total +
+      1 +
+      Number(
+        player.familyMembersComing || 0
+      ),
+    0
+  );
+
+  // =====================================================
+  // TOTAL CHECKED IN
+  // Player + Actual Family
+  // =====================================================
+
+  const totalActual = gateEntries
+    .filter(
+      (entry) => entry.checkedIn
+    )
+    .reduce(
+      (total, entry) =>
         total +
+        1 +
         Number(
-          player.familyMembersComing || 0
+          entry.actualFamilyMembers || 0
         ),
       0
     );
 
   // =====================================================
-  // TOTAL CHECKED IN
+  // REMAINING
   // =====================================================
 
-  const totalActual =
-    gateEntries
-      .filter(
-        (entry) => entry.checkedIn
-      )
-      .reduce(
-        (total, entry) =>
-          total +
-          Number(
-            entry.actualFamilyMembers || 0
-          ),
-        0
-      );
+  const remainingPeople = Math.max(
+    totalExpected - totalActual,
+    0
+  );
+
+  // =====================================================
+  // CHECKED-IN PLAYERS COUNT
+  // =====================================================
+
+  const checkedInPlayers =
+    gateEntries.filter(
+      (entry) => entry.checkedIn
+    ).length;
 
   // =====================================================
   // CHECKED-IN LIST
@@ -611,10 +632,10 @@ function GateEntry() {
 
               </div>
 
-              <p className="mt-3 max-w-2xl text-sm text-[#6F6250]">
-                Player शोधा, Expected Family Members
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6F6250]">
+                Player शोधा, त्यांची अपेक्षित उपस्थिती
                 पहा आणि Gate वर प्रत्यक्ष आलेल्या
-                Members ची Check-In Entry करा.
+                कुटुंबीयांची Check-In Entry करा.
               </p>
 
             </div>
@@ -670,9 +691,9 @@ function GateEntry() {
             SUMMARY
         ================================================= */}
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-          {/* PLAYERS */}
+          {/* TOTAL PLAYERS */}
 
           <div className="rounded-2xl border border-[#E8D49A] bg-white p-5 shadow-[0_8px_25px_rgba(138,90,10,0.05)]">
 
@@ -680,41 +701,129 @@ function GateEntry() {
               Total Players
             </p>
 
-            <p className="mt-2 text-3xl font-black text-[#111111]">
+            <p className="mt-2 text-3xl font-black text-[#8A5A0A]">
               {players.length}
             </p>
 
-          </div>
-
-          {/* EXPECTED */}
-
-          <div className="rounded-2xl border border-[#E8D49A] bg-white p-5 shadow-[0_8px_25px_rgba(138,90,10,0.05)]">
-
-            <p className="text-[10px] font-black uppercase tracking-wider text-[#8A5A0A]">
-              Expected Members
+            <p className="mt-1 text-xs text-slate-400">
+              Registered Players
             </p>
 
-            <p className="mt-2 text-3xl font-black text-[#111111]">
+          </div>
+
+
+          {/* EXPECTED PEOPLE */}
+
+          <div className="rounded-2xl border border-[#E8D49A] bg-[#FFF8E5] p-5">
+
+            <p className="text-[10px] font-black uppercase tracking-wider text-[#8A5A0A]">
+              Expected People
+            </p>
+
+            <p className="mt-2 text-3xl font-black text-[#8A5A0A]">
               {totalExpected}
             </p>
 
-          </div>
-
-          {/* ACTUAL */}
-
-          <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-[0_8px_25px_rgba(16,185,129,0.05)]">
-
-            <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
-              Actual Checked-In
+            <p className="mt-1 text-xs text-[#9A8F7D]">
+              Player + Family
             </p>
 
-            <p className="mt-2 text-3xl font-black text-emerald-700">
+          </div>
+
+
+          {/* CHECKED IN */}
+
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+
+            <p className="text-[10px] font-black uppercase tracking-wider text-emerald-700">
+              Checked-In People
+            </p>
+
+            <p className="mt-2 text-3xl font-black text-emerald-600/70">
               {totalActual}
+            </p>
+
+            <p className="mt-1 text-xs text-emerald-600/70">
+              {checkedInPlayers} Player
+              {checkedInPlayers !== 1
+                ? "s"
+                : ""}{" "}
+              + Family
+            </p>
+
+          </div>
+
+
+          {/* REMAINING */}
+
+          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-5">
+
+            <p className="text-[10px] font-black uppercase tracking-wider text-orange-700">
+              Remaining
+            </p>
+
+            <p className="mt-2 text-3xl font-black text-orange-700">
+              {remainingPeople}
+            </p>
+
+            <p className="mt-1 text-xs text-orange-600/70">
+              Expected − Checked-In
             </p>
 
           </div>
 
         </div>
+
+
+        {/* =================================================
+            ATTENDANCE EXPLANATION
+        ================================================= */}
+
+        <div className="mb-6 rounded-2xl border border-[#E8D49A] bg-white p-4">
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+
+              <p className="text-xs font-black text-[#111111]">
+                Attendance कशी मोजली जाते?
+              </p>
+
+              <p className="mt-1 text-xs text-slate-400">
+                प्रत्येक Player स्वतः 1 person म्हणून
+                आपोआप count होतो.
+              </p>
+
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+
+              <span className="rounded-lg bg-[#FFF8E5] px-3 py-2 text-[#8A5A0A]">
+                1 Player
+              </span>
+
+              <span className="text-slate-300">
+                +
+              </span>
+
+              <span className="rounded-lg bg-slate-50 px-3 py-2 text-slate-600">
+                Family
+              </span>
+
+              <span className="text-slate-300">
+                =
+              </span>
+
+              <span className="rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700">
+                Total People
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
 
         {/* =================================================
             SEARCH
@@ -725,7 +834,7 @@ function GateEntry() {
           <div className="mb-2 flex items-center justify-between">
 
             <label className="text-xs font-bold text-[#6F6250]">
-              Player Search
+              Search Player
             </label>
 
             {search && (
@@ -748,7 +857,7 @@ function GateEntry() {
               onChange={(e) =>
                 setSearch(e.target.value)
               }
-              placeholder="Player चे नाव search करा..."
+              placeholder="Player चे नाव किंवा nickname search करा..."
               className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 pr-12 text-sm font-medium outline-none transition focus:border-[#D4A017] focus:bg-white focus:ring-4 focus:ring-[#D4A017]/10"
             />
 
@@ -770,8 +879,9 @@ function GateEntry() {
 
         </div>
 
+
         {/* =================================================
-            PLAYERS
+            PLAYERS LIST
         ================================================= */}
 
         <section className="mb-10">
@@ -785,7 +895,8 @@ function GateEntry() {
               </h2>
 
               <p className="mt-1 text-xs text-[#9A8F7D]">
-                Database मधील registered players
+                Registered players आणि त्यांची
+                attendance माहिती
               </p>
 
             </div>
@@ -795,6 +906,7 @@ function GateEntry() {
             </span>
 
           </div>
+
 
           {/* LOADING */}
 
@@ -848,18 +960,41 @@ function GateEntry() {
                       player._id
                     );
 
-                  const expected =
+                  const expectedFamily =
                     Number(
                       player.familyMembersComing ||
                         0
                     );
+
+                  const expectedTotal =
+                    1 + expectedFamily;
 
                   const entry =
                     getGateEntryForPlayer(
                       player._id
                     );
 
+                  const actualFamily =
+                    checkedIn && entry
+                      ? Number(
+                          entry.actualFamilyMembers ||
+                            0
+                        )
+                      : null;
+
+                  const actualTotal =
+                    actualFamily !== null
+                      ? 1 + actualFamily
+                      : null;
+
+                  const difference =
+                    actualTotal !== null
+                      ? actualTotal -
+                        expectedTotal
+                      : null;
+
                   return (
+
                     <div
                       key={player._id}
                       className={`overflow-hidden rounded-[20px] border bg-white shadow-[0_8px_25px_rgba(138,90,10,0.05)] transition ${
@@ -869,17 +1004,16 @@ function GateEntry() {
                       }`}
                     >
 
-                      {/* TOP */}
-
                       <div className="p-4 sm:p-5">
 
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                        <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
 
                           {/* PLAYER */}
 
                           <div className="flex min-w-0 flex-1 items-center gap-4">
 
                             {player.photo ? (
+
                               <img
                                 src={player.photo}
                                 alt={
@@ -887,10 +1021,13 @@ function GateEntry() {
                                 }
                                 className="h-14 w-14 shrink-0 rounded-xl border border-slate-200 object-cover"
                               />
+
                             ) : (
+
                               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-xl">
                                 ⚽
                               </div>
+
                             )}
 
                             <div className="min-w-0">
@@ -905,67 +1042,194 @@ function GateEntry() {
                                 </p>
                               )}
 
-                              {checkedIn && (
+                              {checkedIn ? (
+
                                 <span className="mt-2 inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-700">
                                   ✓ Checked In
                                 </span>
+
+                              ) : (
+
+                                <span className="mt-2 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">
+                                  Not Checked In
+                                </span>
+
                               )}
 
                             </div>
 
                           </div>
 
+
                           {/* EXPECTED */}
 
-                          <div className="rounded-xl border border-[#E8D49A] bg-[#FFF8E5] px-5 py-3 lg:min-w-[180px]">
+                          <div className="rounded-xl border border-[#E8D49A] bg-[#FFF8E5] px-4 py-3 xl:min-w-[235px]">
 
                             <p className="text-[10px] font-black uppercase tracking-wider text-[#8A5A0A]">
-                              Expected Family
+                              Expected Attendance
                             </p>
 
-                            <div className="mt-1 flex items-end gap-2">
+                            <div className="mt-2 flex items-center gap-2">
 
-                              <span className="text-2xl font-black text-[#111111]">
-                                {expected}
+                              <div className="text-center">
+
+                                <p className="text-[9px] font-bold text-slate-400">
+                                  Player
+                                </p>
+
+                                <p className="text-xl font-black text-slate-300">
+                                  1
+                                </p>
+
+                              </div>
+
+                              <span className="text-slate-300">
+                                +
                               </span>
 
-                              <span className="mb-1 text-xs text-[#9A8F7D]">
-                                members
+                              <div className="text-center">
+
+                                <p className="text-[9px] font-bold text-slate-400">
+                                  Family
+                                </p>
+
+                                <p className="text-xl font-black text-slate-300">
+                                  {expectedFamily}
+                                </p>
+
+                              </div>
+
+                              <span className="text-slate-300">
+                                =
                               </span>
+
+                              <div className="text-center">
+
+                                <p className="text-[9px] font-bold text-[#8A5A0A]">
+                                  Total
+                                </p>
+
+                                <p className="text-2xl font-black text-[#111111]">
+                                  {expectedTotal}
+                                </p>
+
+                              </div>
 
                             </div>
 
                           </div>
 
+
                           {/* ACTUAL */}
 
                           {checkedIn &&
                             entry && (
-                              <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-5 py-3 lg:min-w-[160px]">
+
+                              <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 xl:min-w-[235px]">
 
                                 <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
-                                  Actual
+                                  Actual Attendance
                                 </p>
 
-                                <div className="mt-1 flex items-end gap-2">
+                                <div className="mt-2 flex items-center gap-2">
 
-                                  <span className="text-2xl font-black text-emerald-700">
-                                    {entry.actualFamilyMembers ||
-                                      0}
+                                  <div className="text-center">
+
+                                    <p className="text-[9px] font-bold text-slate-400">
+                                      Player
+                                    </p>
+
+                                    <p className="text-xl font-black text-slate-300">
+                                      1
+                                    </p>
+
+                                  </div>
+
+                                  <span className="text-slate-300">
+                                    +
                                   </span>
 
-                                  <span className="mb-1 text-xs text-emerald-600">
-                                    members
+                                  <div className="text-center">
+
+                                    <p className="text-[9px] font-bold text-slate-400">
+                                      Family
+                                    </p>
+
+                                    <p className="text-xl font-black text-slate-300">
+                                      {actualFamily}
+                                    </p>
+
+                                  </div>
+
+                                  <span className="text-slate-300">
+                                    =
                                   </span>
+
+                                  <div className="text-center">
+
+                                    <p className="text-[9px] font-bold text-emerald-600">
+                                      Total
+                                    </p>
+
+                                    <p className="text-2xl font-black text-emerald-700">
+                                      {actualTotal}
+                                    </p>
+
+                                  </div>
 
                                 </div>
 
                               </div>
+
                             )}
+
+
+                          {/* DIFFERENCE */}
+
+                          {checkedIn &&
+                            difference !== null && (
+
+                              <div
+                                className={`rounded-xl px-4 py-3 xl:min-w-[110px] ${
+                                  difference > 0
+                                    ? "bg-blue-50"
+                                    : difference < 0
+                                    ? "bg-orange-50"
+                                    : "bg-emerald-50"
+                                }`}
+                              >
+
+                                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                                  Difference
+                                </p>
+
+                                <p
+                                  className={`mt-1 text-2xl font-black ${
+                                    difference > 0
+                                      ? "text-blue-700"
+                                      : difference < 0
+                                      ? "text-orange-700"
+                                      : "text-emerald-700"
+                                  }`}
+                                >
+                                  {difference >= 0
+                                    ? "+"
+                                    : ""}
+                                  {difference}
+                                </p>
+
+                                <p className="text-[9px] text-slate-400">
+                                  people
+                                </p>
+
+                              </div>
+
+                            )}
+
 
                           {/* ACTION */}
 
-                          <div className="lg:w-[140px]">
+                          <div className="xl:w-[140px]">
 
                             {checkedIn ? (
 
@@ -996,6 +1260,7 @@ function GateEntry() {
                       </div>
 
                     </div>
+
                   );
                 }
               )}
@@ -1005,6 +1270,7 @@ function GateEntry() {
           )}
 
         </section>
+
 
         {/* =================================================
             CHECKED-IN LIST
@@ -1032,6 +1298,7 @@ function GateEntry() {
             </span>
 
           </div>
+
 
           {checkedInList.length === 0 ? (
 
@@ -1061,26 +1328,37 @@ function GateEntry() {
                       ? entry.player
                       : null;
 
-                  const expected =
+                  const expectedFamily =
                     Number(
                       entry.expectedFamilyMembers ||
                         player?.familyMembersComing ||
                         0
                     );
 
-                  const actual =
+                  const expectedTotal =
+                    1 + expectedFamily;
+
+                  const actualFamily =
                     Number(
                       entry.actualFamilyMembers ||
                         0
                     );
 
+                  const actualTotal =
+                    1 + actualFamily;
+
+                  const difference =
+                    actualTotal -
+                    expectedTotal;
+
                   return (
+
                     <div
                       key={entry._id}
                       className="rounded-[20px] border border-emerald-200 bg-white p-4 shadow-[0_8px_25px_rgba(16,185,129,0.05)] sm:p-5"
                     >
 
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                      <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
 
                         {/* PLAYER */}
 
@@ -1119,41 +1397,120 @@ function GateEntry() {
 
                         </div>
 
+
                         {/* EXPECTED */}
 
-                        <div className="rounded-xl bg-slate-50 px-5 py-3 lg:min-w-[140px]">
+                        <div className="rounded-xl bg-slate-50 px-4 py-3 xl:min-w-[210px]">
 
                           <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                             Expected
                           </p>
 
-                          <p className="mt-1 text-xl font-black text-[#111111]">
-                            {expected}
-                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+
+                            <div>
+                              <p className="text-[9px] text-slate-400">
+                                Player
+                              </p>
+
+                              <p className="text-lg font-black text-[#111111]">
+                                1
+                              </p>
+                            </div>
+
+                            <span className="text-slate-300">
+                              +
+                            </span>
+
+                            <div>
+                              <p className="text-[9px] text-slate-400">
+                                Family
+                              </p>
+
+                              <p className="text-lg font-black text-[#111111]">
+                                {expectedFamily}
+                              </p>
+                            </div>
+
+                            <span className="text-slate-300">
+                              =
+                            </span>
+
+                            <div>
+                              <p className="text-[9px] font-bold text-slate-500">
+                                Total
+                              </p>
+
+                              <p className="text-xl font-black text-[#111111]">
+                                {expectedTotal}
+                              </p>
+                            </div>
+
+                          </div>
 
                         </div>
 
+
                         {/* ACTUAL */}
 
-                        <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-5 py-3 lg:min-w-[140px]">
+                        <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 xl:min-w-[210px]">
 
                           <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
                             Actual
                           </p>
 
-                          <p className="mt-1 text-xl font-black text-emerald-700">
-                            {actual}
-                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+
+                            <div>
+                              <p className="text-[9px] text-slate-400">
+                                Player
+                              </p>
+
+                              <p className="text-lg font-black text-slate-800">
+                                1
+                              </p>
+                            </div>
+
+                            <span className="text-slate-300">
+                              +
+                            </span>
+
+                            <div>
+                              <p className="text-[9px] text-slate-400">
+                                Family
+                              </p>
+
+                              <p className="text-lg font-black text-emerald-700">
+                                {actualFamily}
+                              </p>
+                            </div>
+
+                            <span className="text-slate-300">
+                              =
+                            </span>
+
+                            <div>
+                              <p className="text-[9px] font-bold text-emerald-600">
+                                Total
+                              </p>
+
+                              <p className="text-xl font-black text-emerald-700">
+                                {actualTotal}
+                              </p>
+                            </div>
+
+                          </div>
 
                         </div>
+
 
                         {/* DIFFERENCE */}
 
                         <div
-                          className={`rounded-xl px-5 py-3 lg:min-w-[130px] ${
-                            actual > expected
+                          className={`rounded-xl px-4 py-3 xl:min-w-[110px] ${
+                            difference > 0
                               ? "bg-blue-50"
-                              : actual < expected
+                              : difference < 0
                               ? "bg-orange-50"
                               : "bg-emerald-50"
                           }`}
@@ -1163,21 +1520,31 @@ function GateEntry() {
                             Difference
                           </p>
 
-                          <p className="mt-1 text-xl font-black text-[#111111]">
-                            {actual -
-                              expected >=
-                            0
+                          <p
+                            className={`mt-1 text-2xl font-black ${
+                              difference > 0
+                                ? "text-blue-700"
+                                : difference < 0
+                                ? "text-orange-700"
+                                : "text-emerald-700"
+                            }`}
+                          >
+                            {difference >= 0
                               ? "+"
                               : ""}
-                            {actual -
-                              expected}
+                            {difference}
+                          </p>
+
+                          <p className="text-[9px] text-slate-400">
+                            people
                           </p>
 
                         </div>
 
+
                         {/* TIME */}
 
-                        <div className="lg:min-w-[170px]">
+                        <div className="xl:min-w-[170px]">
 
                           <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                             Check-In Time
@@ -1194,6 +1561,7 @@ function GateEntry() {
                       </div>
 
                     </div>
+
                   );
                 }
               )}
@@ -1205,6 +1573,7 @@ function GateEntry() {
         </section>
 
       </div>
+
 
       {/* ===================================================
           CHECK-IN MODAL
@@ -1286,54 +1655,130 @@ function GateEntry() {
 
             </div>
 
+
             {/* BODY */}
 
-            <div className="p-5 sm:p-6">
+            <div className="p-4 sm:p-6">
 
-              {/* EXPECTED CARD */}
+              {/* ==========================================
+                  EXPECTED ATTENDANCE
+              ========================================== */}
 
               <div className="rounded-2xl border border-[#E8D49A] bg-[#FFF8E5] p-5">
 
-                <div className="flex items-center justify-between">
+                <div className="mb-4">
 
-                  <div>
+                  <p className="text-xs font-black uppercase tracking-wider text-[#8A5A0A]">
+                    अपेक्षित उपस्थिती
+                  </p>
 
-                    <p className="text-xs font-black uppercase tracking-wider text-[#8A5A0A]">
-                      Expected Family
+                  <p className="mt-1 text-xs text-[#9A8F7D]">
+                    खेळाडू + अपेक्षित कुटुंबीय
+                  </p>
+
+                </div>
+
+
+                <div className="grid grid-cols-2 gap-3">
+
+                  {/* PLAYER */}
+
+                  <div className="rounded-xl bg-white/70 p-4 text-center">
+
+                    <div className="text-2xl">
+                      👤
+                    </div>
+
+                    <p className="mt-2 text-[11px] font-bold text-[#9A8F7D]">
+                      खेळाडू
                     </p>
 
-                    <p className="mt-1 text-xs text-[#9A8F7D]">
-                      Player registration मधून
+                    <p className="mt-1 text-2xl font-black text-[#111111]">
+                      1
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium text-[#9A8F7D]">
+                      आपोआप समाविष्ट
                     </p>
 
                   </div>
 
-                  <div className="text-right">
 
-                    <p className="text-4xl font-black text-[#111111]">
+                  {/* FAMILY */}
+
+                  <div className="rounded-xl bg-white/70 p-4 text-center">
+
+                    <div className="text-2xl">
+                      👨‍👩‍👧
+                    </div>
+
+                    <p className="mt-2 text-[11px] font-bold text-[#9A8F7D]">
+                      कुटुंबीय
+                    </p>
+
+                    <p className="mt-1 text-2xl font-black text-[#111111]">
                       {
                         selectedPlayer.familyMembersComing ||
                         0
                       }
                     </p>
 
-                    <p className="text-[10px] font-bold text-[#9A8F7D]">
-                      MEMBERS
+                    <p className="mt-1 text-[10px] font-medium text-[#9A8F7D]">
+                      अपेक्षित
                     </p>
 
                   </div>
 
                 </div>
 
+
+                {/* TOTAL EXPECTED */}
+
+                <div className="mt-4 flex items-center justify-between rounded-xl bg-[#111111] px-4 py-3">
+
+                  <div>
+
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4A017]">
+                      एकूण अपेक्षित
+                    </p>
+
+                    <p className="mt-1 text-xs font-medium text-white/60">
+                      खेळाडू + कुटुंबीय
+                    </p>
+
+                  </div>
+
+                  <p className="text-3xl font-black text-white">
+                    {
+                      Number(
+                        selectedPlayer.familyMembersComing ||
+                          0
+                      ) + 1
+                    }
+                  </p>
+
+                </div>
+
               </div>
 
-              {/* ACTUAL INPUT */}
+
+              {/* ==========================================
+                  ACTUAL FAMILY MEMBERS INPUT
+              ========================================== */}
 
               <div className="mt-5">
 
-                <label className="mb-2 block text-xs font-bold text-slate-600">
-                  Actual Family Members आले *
+                <label className="mb-2 block text-xs font-black text-slate-700">
+                  प्रत्यक्ष आलेले कुटुंबीय *
                 </label>
+
+                <p className="mb-3 text-xs leading-relaxed text-slate-400">
+                  खेळाडू वगळून प्रत्यक्ष आलेल्या
+                  कुटुंबीयांची संख्या भरा.
+                  <br />
+                  खेळाडूचा समावेश आपोआप 1 म्हणून
+                  केला जाईल.
+                </p>
 
                 <input
                   type="number"
@@ -1355,48 +1800,115 @@ function GateEntry() {
                   autoFocus
                 />
 
-                <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                  Gate वर प्रत्यक्ष आलेल्या
-                  Family Members ची संख्या
-                  भरा.
-                </p>
-
               </div>
 
-              {/* COMPARISON */}
+
+              {/* ==========================================
+                  ACTUAL ATTENDANCE PREVIEW
+              ========================================== */}
 
               {actualFamilyMembers !== "" && (
 
-                <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
 
-                  <div className="rounded-xl bg-slate-50 p-4">
+                  <div className="mb-4">
 
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                      Expected
+                    <p className="text-xs font-black uppercase tracking-wider text-emerald-700">
+                      प्रत्यक्ष उपस्थिती
                     </p>
 
-                    <p className="mt-1 text-xl font-black text-[#111111]">
-                      {
-                        selectedPlayer.familyMembersComing ||
-                        0
-                      }
+                    <p className="mt-1 text-xs text-emerald-600/70">
+                      Gate वर नोंदवलेली उपस्थिती
                     </p>
 
                   </div>
 
-                  <div className="rounded-xl bg-emerald-50 p-4">
 
-                    <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600">
-                      Actual
-                    </p>
+                  <div className="grid grid-cols-2 gap-3">
 
-                    <p className="mt-1 text-xl font-black text-emerald-700">
-                      {
-                        Number(
-                          actualFamilyMembers
-                        )
-                      }
-                    </p>
+                    {/* PLAYER */}
+
+                    <div className="rounded-xl bg-white/80 p-4 text-center">
+
+                      <div className="text-2xl">
+                        👤
+                      </div>
+
+                      <p className="mt-2 text-[11px] font-bold text-slate-500">
+                        खेळाडू
+                      </p>
+
+                      <p className="mt-1 text-2xl font-black text-slate-800">
+                        1
+                      </p>
+
+                      <p className="mt-1 text-[10px] font-medium text-slate-400">
+                        Check-In
+                      </p>
+
+                    </div>
+
+
+                    {/* FAMILY */}
+
+                    <div className="rounded-xl bg-white/80 p-4 text-center">
+
+                      <div className="text-2xl">
+                        👨‍👩‍👧
+                      </div>
+
+                      <p className="mt-2 text-[11px] font-bold text-slate-500">
+                        कुटुंबीय
+                      </p>
+
+                      <p className="mt-1 text-2xl font-black text-emerald-700">
+                        {
+                          Number(
+                            actualFamilyMembers
+                          )
+                        }
+                      </p>
+
+                      <p className="mt-1 text-[10px] font-medium text-slate-400">
+                        प्रत्यक्ष आले
+                      </p>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* TOTAL CHECKED IN */}
+
+                  <div className="mt-4 flex items-center justify-between rounded-xl bg-emerald-700 px-4 py-3">
+
+                    <div>
+
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">
+                        एकूण Check-In
+                      </p>
+
+                      <p className="mt-1 text-xs font-medium text-white/70">
+                        खेळाडू + आलेले कुटुंबीय
+                      </p>
+
+                    </div>
+
+                    <div className="text-right">
+
+                      <p className="text-3xl font-black text-white">
+                        {
+                          Number(
+                            actualFamilyMembers
+                          ) + 1
+                        }
+                      </p>
+
+                      <p className="text-[10px] font-bold text-emerald-100">
+                        व्यक्ती
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -1404,7 +1916,10 @@ function GateEntry() {
 
               )}
 
-              {/* ERROR */}
+
+              {/* ==========================================
+                  ERROR
+              ========================================== */}
 
               {error && (
 
@@ -1414,7 +1929,10 @@ function GateEntry() {
 
               )}
 
-              {/* ACTIONS */}
+
+              {/* ==========================================
+                  ACTION BUTTONS
+              ========================================== */}
 
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
 
@@ -1426,6 +1944,7 @@ function GateEntry() {
                 >
                   Cancel
                 </button>
+
 
                 <button
                   type="button"
