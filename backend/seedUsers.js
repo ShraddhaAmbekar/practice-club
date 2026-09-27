@@ -14,35 +14,35 @@ const users = [
   {
     name: "Data Entry User 1",
     username: "entry01",
-    password: "Entry@101",
+    password: "Entry@1",
     role: "data_entry",
   },
 
   {
     name: "Data Entry User 2",
     username: "entry02",
-    password: "Entry@102",
+    password: "Entry@2",
     role: "data_entry",
   },
 
   {
     name: "Data Entry User 3",
     username: "entry03",
-    password: "Entry@103",
+    password: "Entry@3",
     role: "data_entry",
   },
 
   {
     name: "Data Entry User 4",
     username: "entry04",
-    password: "Entry@104",
+    password: "Entry@4",
     role: "data_entry",
   },
 
   {
     name: "Data Entry User 5",
     username: "entry05",
-    password: "Entry@105",
+    password: "Entry@5",
     role: "data_entry",
   },
 
