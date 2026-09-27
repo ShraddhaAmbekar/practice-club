@@ -26,23 +26,15 @@ const users = [
   },
 
   {
-    name: "Data Entry User 3",
-    username: "entry03",
-    password: "Entry@3",
+    name: "gate Entry User 1",
+    username: "gate01",
+    password: "Gate@01",
     role: "data_entry",
   },
-
-  {
-    name: "Data Entry User 4",
-    username: "entry04",
-    password: "Entry@4",
-    role: "data_entry",
-  },
-
-  {
-    name: "Data Entry User 5",
-    username: "entry05",
-    password: "Entry@5",
+    {
+    name: "gate Entry User 2",
+    username: "gate02",
+    password: "Gate@02",
     role: "data_entry",
   },
 
